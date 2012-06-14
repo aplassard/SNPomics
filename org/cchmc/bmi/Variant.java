@@ -7,5 +7,5 @@ public class Variant {
 	private GenomicSpan position;
 	private String ref;
 	private List<String> alt;
-	private List<Annotation> anno;
+	private List<Annotation> annot;
 }
