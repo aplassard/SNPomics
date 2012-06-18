@@ -1,4 +1,4 @@
-package org.cchmc.bmi;
+package org.cchmc.bmi.snpomics.annotation;
 
 public interface Annotation {
 

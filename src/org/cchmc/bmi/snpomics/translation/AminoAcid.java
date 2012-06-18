@@ -1,4 +1,4 @@
-package org.cchmc.bmi.translation;
+package org.cchmc.bmi.snpomics.translation;
 
 import java.util.HashMap;
 

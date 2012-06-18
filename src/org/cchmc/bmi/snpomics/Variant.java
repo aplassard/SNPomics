@@ -1,6 +1,8 @@
-package org.cchmc.bmi;
+package org.cchmc.bmi.snpomics;
 
 import java.util.List;
+
+import org.cchmc.bmi.snpomics.annotation.Annotation;
 
 public class Variant {
 

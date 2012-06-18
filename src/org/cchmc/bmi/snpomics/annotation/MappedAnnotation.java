@@ -1,4 +1,6 @@
-package org.cchmc.bmi;
+package org.cchmc.bmi.snpomics.annotation;
+
+import org.cchmc.bmi.snpomics.GenomicSpan;
 
 public interface MappedAnnotation extends Annotation {
 

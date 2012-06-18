@@ -1,4 +1,4 @@
-package org.cchmc.bmi;
+package org.cchmc.bmi.snpomics;
 
 import java.util.ArrayList;
 import java.util.List;
