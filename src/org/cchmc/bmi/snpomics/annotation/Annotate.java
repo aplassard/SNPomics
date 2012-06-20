@@ -1,5 +1,9 @@
 package org.cchmc.bmi.snpomics.annotation;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.cchmc.bmi.snpomics.SimpleVariant;
 import org.cchmc.bmi.snpomics.Variant;
 import org.cchmc.bmi.snpomics.annotation.annotator.Annotator;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
@@ -22,19 +26,19 @@ public class Annotate {
 	}
 	
 	/**
-	 * A convenience class to directly annotate a variant.  Large-scale annotation
+	 * A convenience method to directly calculate annotations.  Large-scale annotation
 	 * efforts should instead use getAnnotator and call annotate() directly on those, to
 	 * save the expense of looking up and constructing Annotators
 	 * @param variant to be annotated
 	 * @param cls annotation
 	 * @param factory
-	 * @return the result of {@link Annotator#annotate(Variant, AnnotationFactory)}, or 0 if no 
-	 * Annotator could be created
+	 * @return the result of {@link Annotator#annotate(Variant, AnnotationFactory)}, or an empty list
+	 * if no Annotator could be created
 	 */
-	public static int annotate(Variant variant, Class<? extends Annotation> cls, AnnotationFactory factory) {
-		Annotator<?> annotator = getAnnotator(cls, factory);
+	public static <T extends Annotation> List<T> annotate(SimpleVariant variant, Class<T> cls, AnnotationFactory factory) {
+		Annotator<T> annotator = getAnnotator(cls, factory);
 		if (annotator == null)
-			return 0;
+			return Collections.emptyList();
 		return annotator.annotate(variant, factory);
 	}
 }

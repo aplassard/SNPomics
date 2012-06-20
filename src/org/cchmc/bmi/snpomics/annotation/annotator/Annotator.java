@@ -1,6 +1,8 @@
 package org.cchmc.bmi.snpomics.annotation.annotator;
 
-import org.cchmc.bmi.snpomics.Variant;
+import java.util.List;
+
+import org.cchmc.bmi.snpomics.SimpleVariant;
 import org.cchmc.bmi.snpomics.annotation.Annotation;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 
@@ -11,10 +13,10 @@ import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 public interface Annotator<T extends Annotation> {
 
 	/**
-	 * Adds zero or more annotations to a variant
+	 * Calculates "interactive" annotations appropriate to a variant
 	 * @param variant The variant to be annotated
 	 * @param factory A valid factory that can be used to look up relevant reference annotations
-	 * @return the number of annotations actually written
+	 * @return the list of annotations
 	 */
-	int annotate(Variant variant, AnnotationFactory factory);
+	List<T> annotate(SimpleVariant variant, AnnotationFactory factory);
 }
