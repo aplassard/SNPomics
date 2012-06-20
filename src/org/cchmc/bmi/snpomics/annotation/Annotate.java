@@ -7,6 +7,7 @@ import org.cchmc.bmi.snpomics.SimpleVariant;
 import org.cchmc.bmi.snpomics.Variant;
 import org.cchmc.bmi.snpomics.annotation.annotator.Annotator;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
+import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
 
 /**
  * A factory class that provides {@link Annotator}s appropriate to {@link Annotation}s
@@ -34,8 +35,9 @@ public class Annotate {
 	 * @param factory
 	 * @return the result of {@link Annotator#annotate(Variant, AnnotationFactory)}, or an empty list
 	 * if no Annotator could be created
+	 * @throws AnnotationNotFoundException a required reference annotation could not be loaded
 	 */
-	public static <T extends Annotation> List<T> annotate(SimpleVariant variant, Class<T> cls, AnnotationFactory factory) {
+	public static <T extends Annotation> List<T> annotate(SimpleVariant variant, Class<T> cls, AnnotationFactory factory) throws AnnotationNotFoundException {
 		Annotator<T> annotator = getAnnotator(cls, factory);
 		if (annotator == null)
 			return Collections.emptyList();

@@ -6,6 +6,7 @@ import java.util.List;
 import org.cchmc.bmi.snpomics.annotation.Annotation;
 import org.cchmc.bmi.snpomics.annotation.importer.AnnotationImporter;
 import org.cchmc.bmi.snpomics.annotation.loader.AnnotationLoader;
+import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
 
 /**
  * <p>An AnnotationFactory manages a particular type of database (ie SQL, NoSQL, flat files)
@@ -41,8 +42,10 @@ public abstract class AnnotationFactory {
 	 * or {@link #getLoader(Class, String)}
 	 * @param cls The class of annotation to load
 	 * @return A suitable AnnotationLoader
+	 * @throws AnnotationNotFoundException the requested annotation is not present in this store, or no 
+	 * Loader suitable for this store exists
 	 */
-	public <T extends Annotation> AnnotationLoader<T> getLoader(Class<T> cls) {
+	public <T extends Annotation> AnnotationLoader<T> getLoader(Class<T> cls) throws AnnotationNotFoundException {
 		return getLoader(cls, getDefaultTable(cls));
 	}
 	/**
@@ -51,8 +54,10 @@ public abstract class AnnotationFactory {
 	 * @param cls The class of annotation to load
 	 * @param table The table of annotations to use
 	 * @return A suitable AnnotationLoader
+	 * @throws AnnotationNotFoundException the requested annotation is not present in this store, or no 
+	 * Loader suitable for this store exists
 	 */
-	public abstract <T extends Annotation> AnnotationLoader<T> getLoader(Class<T> cls, String table);
+	public abstract <T extends Annotation> AnnotationLoader<T> getLoader(Class<T> cls, String table) throws AnnotationNotFoundException;
 	
 	/**
 	 * List all of the sources of this annotation in the current genome (ie, refseq vs ensembl
