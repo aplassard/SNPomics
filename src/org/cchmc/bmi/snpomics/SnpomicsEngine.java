@@ -12,7 +12,7 @@ import org.cchmc.bmi.snpomics.reader.InputIterator;
 import org.cchmc.bmi.snpomics.writer.VariantWriter;
 
 public class SnpomicsEngine {
-	void run(InputIterator input, VariantWriter output, AnnotationFactory factory, 
+	public static void run(InputIterator input, VariantWriter output, AnnotationFactory factory, 
 			List<Class<? extends Annotation>> annotations) throws AnnotationNotFoundException {
 		
 		//Initialize the output
@@ -20,7 +20,7 @@ public class SnpomicsEngine {
 		output.writeHeaders(annotations);
 		
 		//Create and store the Annotators
-		List<Annotator<?>> annotators = new ArrayList<Annotator<?>>();
+		List<Annotator<? extends Annotation>> annotators = new ArrayList<Annotator<?>>();
 		for (Class<? extends Annotation> ann : annotations)
 			annotators.add(Annotate.getAnnotator(ann, factory));
 		
@@ -28,14 +28,15 @@ public class SnpomicsEngine {
 		while (input.next()) {
 			Variant annotated = input.getVariant();
 			//For each variant, annotate each allele with each annotation
-			for (Annotator<?> ann : annotators) {
+			for (Annotator<? extends Annotation> ann : annotators) {
 				for (int i=0; i<annotated.getAlt().size(); i++) {
 					SimpleVariant sv = annotated.getSimpleVariant(i);
-					annotated.getAnnot().addAll(ann.annotate(sv, factory));
+					annotated.addAnnotation(ann.annotate(sv, factory), i);
 				}
 			}
 			//And save the results
 			output.writeVariant(annotated);
 		}
+		output.close();
 	}
 }

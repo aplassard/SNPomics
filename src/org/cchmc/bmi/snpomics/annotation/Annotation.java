@@ -26,7 +26,8 @@ import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
  *  {@link Annotate#getAnnotator(Class, AnnotationFactory)}.  Since Annotate is concrete, you
  *  only have to do it once</li>
  * </ul>
- * <p>All Annotations should be annotated (in the Java sense) with {@link Abbreviation} and {@link Description}
+ * <p>All Annotations should be annotated (in the Java sense) with {@link Abbreviation},
+ * {@link ShortName}, and {@link Description}
  * @author dexzb9
  *
  */

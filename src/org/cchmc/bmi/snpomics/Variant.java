@@ -1,15 +1,31 @@
 package org.cchmc.bmi.snpomics;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.cchmc.bmi.snpomics.annotation.Annotation;
 
 public class Variant {
+	/*
+	 * The storage of annotations is complex, because there are so many possibilities.  Unfortunately,
+	 * it's going to be up to the VariantWriters to sort all this out.
+	 * 
+	 * Annotations are first separated by type, then by which alternate allele they specify.
+	 * Finally, a given alt allele (or SimpleVariant) can have multiple annotations (for instance,
+	 * in the case of alternative transcripts), so store those as a List
+	 */
 
 	private GenomicSpan position;
 	private String ref;
 	private List<String> alt;
-	private List<Annotation> annot;
+	private Map<Class<? extends Annotation>, List<List<? extends Annotation>>> annot;
+	
+	public Variant() {
+		annot = new HashMap<Class<? extends Annotation>, List<List<? extends Annotation>>>();
+	}
 	
 	public GenomicSpan getPosition() {
 		return position;
@@ -29,11 +45,21 @@ public class Variant {
 	public void setAlt(List<String> alt) {
 		this.alt = alt;
 	}
-	public List<Annotation> getAnnot() {
-		return annot;
+	public List<? extends Annotation> getAnnot(Class<? extends Annotation> cls, int altAllele) {
+		if (!annot.containsKey(cls))
+			return Collections.emptyList();
+		return annot.get(cls).get(altAllele);
 	}
-	public void setAnnot(List<Annotation> annot) {
-		this.annot = annot;
+	public void addAnnotation(Class<? extends Annotation> cls, List<? extends Annotation> newAnnot, int altAllele) {
+		if (!annot.containsKey(cls)) {
+			annot.put(cls, new ArrayList<List<? extends Annotation>>());
+		}
+		annot.get(cls).add(altAllele, newAnnot);
+	}
+	public void addAnnotation(List<? extends Annotation> newAnnot, int altAllele) {
+		if (newAnnot.size() == 0)
+			throw new IllegalArgumentException("addAnnotation called with no explicit class and an empty list");
+		addAnnotation(newAnnot.get(0).getClass(), newAnnot, altAllele);
 	}
 	
 	public SimpleVariant getSimpleVariant(int altAllele) {

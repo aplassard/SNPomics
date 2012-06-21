@@ -6,13 +6,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Intended for Annotations, the Abbreviation should be unique among annotations and contain no
- * whitespace or special characters.  Most likely place to see this is in a VCF file
+ * Intended for Annotations, the ShortName should be short and descriptive, with no likely delimiters
+ * (tabs or commas).  Most likely place to see this is in column headers of a tab-separated file
  * @author dexzb9
  *
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Abbreviation {
+public @interface ShortName {
 	String value();
 }

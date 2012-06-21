@@ -17,4 +17,5 @@ public interface VariantWriter {
 	void pairWithInput(InputIterator input);
 	void writeHeaders(List<Class<? extends Annotation>> annotInfo);
 	void writeVariant(Variant annotatedVariant);
+	void close();
 }
