@@ -8,7 +8,7 @@ import org.cchmc.bmi.snpomics.GenomicSpan;
  * @author dexzb9
  *
  */
-public interface MappedAnnotation extends Annotation {
+public interface MappedAnnotation extends ReferenceAnnotation {
 
 	/**
 	 * Where is it?

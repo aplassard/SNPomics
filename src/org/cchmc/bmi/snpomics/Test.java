@@ -6,9 +6,8 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import org.cchmc.bmi.snpomics.annotation.Annotation;
-import org.cchmc.bmi.snpomics.annotation.DummyAnnotation;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.annotation.factory.DummyFactory;
 import org.cchmc.bmi.snpomics.reader.InputIterator;
@@ -28,8 +27,12 @@ public class Test {
 			InputIterator input = new VCFReader(new BufferedReader(new FileReader(args[0])));
 			VariantWriter output = new TsvWriter(new PrintWriter(new FileWriter(args[1])));
 			//VariantWriter output = new TsvWriter(new PrintWriter(System.out));
-			List<Class<? extends Annotation>> desiredAnnotations = new ArrayList<Class<? extends Annotation>>();
-			desiredAnnotations.add(DummyAnnotation.class);
+			
+			Map<String, OutputField> potentialFields = SnpomicsEngine.getAllowedOutput();
+			
+			List<OutputField> desiredAnnotations = new ArrayList<OutputField>();
+			desiredAnnotations.add(potentialFields.get("Dummy"));
+			
 			SnpomicsEngine.run(input, output, factory, desiredAnnotations);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);

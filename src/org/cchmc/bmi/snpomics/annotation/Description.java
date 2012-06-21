@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * @author dexzb9
  *
  */
-@Target(ElementType.TYPE)
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Description {
 	String value();

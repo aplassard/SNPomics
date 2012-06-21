@@ -2,7 +2,7 @@ package org.cchmc.bmi.snpomics.annotation.importer;
 
 import java.io.InputStream;
 
-import org.cchmc.bmi.snpomics.annotation.Annotation;
+import org.cchmc.bmi.snpomics.annotation.ReferenceAnnotation;
 
 /**
  * Loads annotations into a datastore (ie, sql database).  This is a very simple interface,
@@ -12,7 +12,7 @@ import org.cchmc.bmi.snpomics.annotation.Annotation;
  *
  * @param <T>
  */
-public interface AnnotationImporter<T extends Annotation> {
+public interface AnnotationImporter<T extends ReferenceAnnotation> {
 
 	/**
 	 * The method that actually reads data from input and writes it to the datastore

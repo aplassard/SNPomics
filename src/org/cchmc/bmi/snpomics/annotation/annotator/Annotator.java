@@ -3,7 +3,7 @@ package org.cchmc.bmi.snpomics.annotation.annotator;
 import java.util.List;
 
 import org.cchmc.bmi.snpomics.SimpleVariant;
-import org.cchmc.bmi.snpomics.annotation.Annotation;
+import org.cchmc.bmi.snpomics.annotation.InteractiveAnnotation;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
 
@@ -11,7 +11,7 @@ import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
  * An object which knows how to annotate variants with a specific Annotation
  * @author dexzb9
  */
-public interface Annotator<T extends Annotation> {
+public interface Annotator<T extends InteractiveAnnotation> {
 
 	/**
 	 * Calculates "interactive" annotations appropriate to a variant

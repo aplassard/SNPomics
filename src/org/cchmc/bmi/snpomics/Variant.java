@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.cchmc.bmi.snpomics.annotation.Annotation;
+import org.cchmc.bmi.snpomics.annotation.InteractiveAnnotation;
 
 public class Variant {
 	/*
@@ -21,10 +21,10 @@ public class Variant {
 	private GenomicSpan position;
 	private String ref;
 	private List<String> alt;
-	private Map<Class<? extends Annotation>, List<List<? extends Annotation>>> annot;
+	private Map<Class<? extends InteractiveAnnotation>, List<List<? extends InteractiveAnnotation>>> annot;
 	
 	public Variant() {
-		annot = new HashMap<Class<? extends Annotation>, List<List<? extends Annotation>>>();
+		annot = new HashMap<Class<? extends InteractiveAnnotation>, List<List<? extends InteractiveAnnotation>>>();
 	}
 	
 	public GenomicSpan getPosition() {
@@ -45,18 +45,18 @@ public class Variant {
 	public void setAlt(List<String> alt) {
 		this.alt = alt;
 	}
-	public List<? extends Annotation> getAnnot(Class<? extends Annotation> cls, int altAllele) {
+	public List<? extends InteractiveAnnotation> getAnnot(Class<? extends InteractiveAnnotation> cls, int altAllele) {
 		if (!annot.containsKey(cls))
 			return Collections.emptyList();
 		return annot.get(cls).get(altAllele);
 	}
-	public void addAnnotation(Class<? extends Annotation> cls, List<? extends Annotation> newAnnot, int altAllele) {
+	public void addAnnotation(Class<? extends InteractiveAnnotation> cls, List<? extends InteractiveAnnotation> newAnnot, int altAllele) {
 		if (!annot.containsKey(cls)) {
-			annot.put(cls, new ArrayList<List<? extends Annotation>>());
+			annot.put(cls, new ArrayList<List<? extends InteractiveAnnotation>>());
 		}
 		annot.get(cls).add(altAllele, newAnnot);
 	}
-	public void addAnnotation(List<? extends Annotation> newAnnot, int altAllele) {
+	public void addAnnotation(List<? extends InteractiveAnnotation> newAnnot, int altAllele) {
 		if (newAnnot.size() == 0)
 			throw new IllegalArgumentException("addAnnotation called with no explicit class and an empty list");
 		addAnnotation(newAnnot.get(0).getClass(), newAnnot, altAllele);

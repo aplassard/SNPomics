@@ -2,7 +2,8 @@ package org.cchmc.bmi.snpomics.annotation.loader;
 
 import java.util.List;
 
-import org.cchmc.bmi.snpomics.annotation.Annotation;
+import org.cchmc.bmi.snpomics.annotation.ReferenceAnnotation;
+import org.cchmc.bmi.snpomics.annotation.importer.AnnotationImporter;
 
 /**
  * An interface to the underlying data store that can retrieve specific annotations.
@@ -13,7 +14,7 @@ import org.cchmc.bmi.snpomics.annotation.Annotation;
  * is {@link AnnotationImporter}, not AnnotationLoader
  * @author dexzb9
  */
-public interface AnnotationLoader<T extends Annotation> {
+public interface AnnotationLoader<T extends ReferenceAnnotation> {
 
 	/**
 	 * Loads a single Annotation based on its unique ID

@@ -2,8 +2,8 @@ package org.cchmc.bmi.snpomics.writer;
 
 import java.util.List;
 
+import org.cchmc.bmi.snpomics.OutputField;
 import org.cchmc.bmi.snpomics.Variant;
-import org.cchmc.bmi.snpomics.annotation.Annotation;
 import org.cchmc.bmi.snpomics.reader.InputIterator;
 
 /**
@@ -15,7 +15,7 @@ import org.cchmc.bmi.snpomics.reader.InputIterator;
  */
 public interface VariantWriter {
 	void pairWithInput(InputIterator input);
-	void writeHeaders(List<Class<? extends Annotation>> annotInfo);
+	void writeHeaders(List<OutputField> fields);
 	void writeVariant(Variant annotatedVariant);
 	void close();
 }

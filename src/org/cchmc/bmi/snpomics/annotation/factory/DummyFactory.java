@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.cchmc.bmi.snpomics.annotation.Annotation;
+import org.cchmc.bmi.snpomics.annotation.ReferenceAnnotation;
 import org.cchmc.bmi.snpomics.annotation.importer.AnnotationImporter;
 import org.cchmc.bmi.snpomics.annotation.loader.AnnotationLoader;
 import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
@@ -36,7 +36,7 @@ public class DummyFactory extends AnnotationFactory {
 	}
 
 	@Override
-	public <T extends Annotation> AnnotationLoader<T> getLoader(Class<T> cls,
+	public <T extends ReferenceAnnotation> AnnotationLoader<T> getLoader(Class<T> cls,
 			String table) throws AnnotationNotFoundException {
 		if (currentGenome == null)
 			throw new GenomeNotSetException();
@@ -45,28 +45,28 @@ public class DummyFactory extends AnnotationFactory {
 	}
 
 	@Override
-	public List<String> getAvailableTables(Class<? extends Annotation> cls) {
+	public List<String> getAvailableTables(Class<? extends ReferenceAnnotation> cls) {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public String getDefaultTable(Class<? extends Annotation> cls) {
+	public String getDefaultTable(Class<? extends ReferenceAnnotation> cls) {
 		return null;
 	}
 
 	@Override
-	public void setDefaultTable(Class<? extends Annotation> cls, String table) {
+	public void setDefaultTable(Class<? extends ReferenceAnnotation> cls, String table) {
 	}
 
 	@Override
-	protected <T extends Annotation> AnnotationImporter<T> getImporter(
+	protected <T extends ReferenceAnnotation> AnnotationImporter<T> getImporter(
 			Class<T> cls) {
 		return null;
 	}
 
 	@Override
 	public boolean importData(InputStream input, String table,
-			Class<? extends Annotation> cls) {
+			Class<? extends ReferenceAnnotation> cls) {
 		return false;
 	}
 

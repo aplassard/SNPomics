@@ -3,7 +3,7 @@ package org.cchmc.bmi.snpomics.annotation.factory;
 import java.io.InputStream;
 import java.util.List;
 
-import org.cchmc.bmi.snpomics.annotation.Annotation;
+import org.cchmc.bmi.snpomics.annotation.ReferenceAnnotation;
 import org.cchmc.bmi.snpomics.annotation.importer.AnnotationImporter;
 import org.cchmc.bmi.snpomics.annotation.loader.AnnotationLoader;
 import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
@@ -45,7 +45,7 @@ public abstract class AnnotationFactory {
 	 * @throws AnnotationNotFoundException the requested annotation is not present in this store, or no 
 	 * Loader suitable for this store exists
 	 */
-	public <T extends Annotation> AnnotationLoader<T> getLoader(Class<T> cls) throws AnnotationNotFoundException {
+	public <T extends ReferenceAnnotation> AnnotationLoader<T> getLoader(Class<T> cls) throws AnnotationNotFoundException {
 		return getLoader(cls, getDefaultTable(cls));
 	}
 	/**
@@ -57,7 +57,7 @@ public abstract class AnnotationFactory {
 	 * @throws AnnotationNotFoundException the requested annotation is not present in this store, or no 
 	 * Loader suitable for this store exists
 	 */
-	public abstract <T extends Annotation> AnnotationLoader<T> getLoader(Class<T> cls, String table) throws AnnotationNotFoundException;
+	public abstract <T extends ReferenceAnnotation> AnnotationLoader<T> getLoader(Class<T> cls, String table) throws AnnotationNotFoundException;
 	
 	/**
 	 * List all of the sources of this annotation in the current genome (ie, refseq vs ensembl
@@ -65,7 +65,7 @@ public abstract class AnnotationFactory {
 	 * @param cls The class of annotation we're interested in
 	 * @return A list (possibly empty) of table names that supply this annotation
 	 */
-	public abstract List<String> getAvailableTables(Class<? extends Annotation> cls);
+	public abstract List<String> getAvailableTables(Class<? extends ReferenceAnnotation> cls);
 	/**
 	 * Returns the default table, either specified by the genome or a previous call to
 	 * {@link #setDefaultTable(Class, String)}, that will be used in a call to
@@ -73,21 +73,21 @@ public abstract class AnnotationFactory {
 	 * @param cls The class of annotation we're interested in
 	 * @return The name of the "default" table for this annotation
 	 */
-	public abstract String getDefaultTable(Class<? extends Annotation> cls);
+	public abstract String getDefaultTable(Class<? extends ReferenceAnnotation> cls);
 	/**
 	 * Sets the default table that will be used in calls to {@link #getLoader(Class)},
 	 * overriding the defaults specified by the genome
 	 * @param cls The class of annotation we're interested in
 	 * @param table The name of the new default table to use
 	 */
-	public abstract void setDefaultTable(Class<? extends Annotation> cls, String table);
+	public abstract void setDefaultTable(Class<? extends ReferenceAnnotation> cls, String table);
 	
 	/**
 	 * internal function to construct an Importer appropriate to the Annotation
 	 * @param cls
 	 * @return
 	 */
-	protected abstract <T extends Annotation> AnnotationImporter<T> getImporter(Class<T> cls);
+	protected abstract <T extends ReferenceAnnotation> AnnotationImporter<T> getImporter(Class<T> cls);
 	/**
 	 * loads reference annotations into the appropriate datastore
 	 * @param input the actual annotations
@@ -96,5 +96,5 @@ public abstract class AnnotationFactory {
 	 * @param cls the type of annotation represented in the data
 	 * @return true on success
 	 */
-	public abstract boolean importData(InputStream input, String table, Class<? extends Annotation> cls);
+	public abstract boolean importData(InputStream input, String table, Class<? extends ReferenceAnnotation> cls);
 }
