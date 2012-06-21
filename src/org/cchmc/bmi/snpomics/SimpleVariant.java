@@ -21,7 +21,7 @@ public class SimpleVariant {
 				ref.charAt(0) == alt.charAt(0)) {
 			ref = ref.substring(1);
 			alt = alt.substring(1);
-			pos.setStart(pos.getStart()+1);
+			position.setStart(position.getStart()+1);
 		}
 	}
 	
