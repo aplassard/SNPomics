@@ -6,10 +6,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.cchmc.bmi.snpomics.annotation.Annotate;
+import org.cchmc.bmi.snpomics.annotation.AnnotationType;
 import org.cchmc.bmi.snpomics.annotation.InteractiveAnnotation;
+import org.cchmc.bmi.snpomics.annotation.ReferenceAnnotation;
 import org.cchmc.bmi.snpomics.annotation.annotator.Annotator;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
@@ -43,7 +46,7 @@ public class SnpomicsEngine {
 			for (Annotator<? extends InteractiveAnnotation> ann : annotators) {
 				for (int i=0; i<annotated.getAlt().size(); i++) {
 					SimpleVariant sv = annotated.getSimpleVariant(i);
-					annotated.addAnnotation(ann.annotate(sv, factory), i);
+					annotated.addAnnotation(ann.getAnnotationClass(), ann.annotate(sv, factory), i);
 				}
 			}
 			//And save the results
@@ -74,4 +77,35 @@ public class SnpomicsEngine {
 		}
 		return result;
 	}
+	
+	public static Map<String, Class<? extends ReferenceAnnotation>> getAnnotations() {
+		Map<String, Class<? extends ReferenceAnnotation>> result = new HashMap<String, Class<? extends ReferenceAnnotation>>();
+		Reflections reflections = new Reflections("org.cchmc.bmi.snpomics.annotation");
+		for (Class<? extends ReferenceAnnotation> cls : reflections.getSubTypesOf(ReferenceAnnotation.class)) {
+			AnnotationType name = cls.getAnnotation(AnnotationType.class);
+			if (name != null) {
+				if (result.containsKey(name.value())) {
+					throw new RuntimeException("Duplicate AnnotationTypes: "+cls.getCanonicalName()+
+							" and "+result.get(name.value()).getCanonicalName());
+				}
+				result.put(name.value(), cls);
+			}
+		}
+		return result;
+	}
+	
+	public static String getProperty(String key) {
+		return prop.getProperty(key);
+	}
+	public static String getProperty(String key, String defaultValue) {
+		return prop.getProperty(key, defaultValue);
+	}
+	public static Object setProperty(String key, String value) {
+		return prop.setProperty(key, value);
+	}
+	public static Properties getProperties() {
+		return prop;
+	}
+	
+	private static final Properties prop = new Properties();
 }

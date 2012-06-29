@@ -12,14 +12,12 @@ public class StandardGeneticCode extends GeneticCode {
 		return AminoAcid.UNK;
 	}
 	
-	@Override
-	public boolean isValidStop(String codon) {
-		return codon.equals("TAA") || codon.equals("TAG") || codon.equals("TGA");
-	}
-	
+	/**
+	 * In rare cases, the Standard Code permits translation to start at UUG or CUG
+	 */
 	@Override
 	public boolean isValidStart(String codon) {
-		return codon.equals("ATG") || codon.equals("TTG") || codon.equals("CTG");
+		return super.isValidStart(codon) || codon.equals("TTG") || codon.equals("CTG");
 	}
 	
 	private static HashMap<String, AminoAcid> table;

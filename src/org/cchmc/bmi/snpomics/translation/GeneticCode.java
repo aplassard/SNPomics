@@ -36,4 +36,13 @@ public abstract class GeneticCode {
 	public boolean isValidStart(String codon) {
 		return translateCodon(codon) == AminoAcid.MET;
 	}
+	
+	public static GeneticCode getTable(int tableID) {
+		switch (tableID) {
+		case 1: return new StandardGeneticCode();
+		case 2: return new VertebrateMitoGeneticCode();
+		}
+		System.err.println("Unknown translation table "+tableID+", using Standard(1)");
+		return new StandardGeneticCode();
+	}
 }

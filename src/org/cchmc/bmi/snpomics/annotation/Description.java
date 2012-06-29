@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Intended for Annotations, the Description should be short (one sentence) and suitable for 
+ * Intended for {@link OutputField OutputFields}, the Description should be short (one sentence) and suitable for 
  * display to the user 
  * @author dexzb9
  *

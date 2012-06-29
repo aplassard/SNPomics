@@ -1,12 +1,14 @@
 package org.cchmc.bmi.snpomics.annotation.factory;
 
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.cchmc.bmi.snpomics.Genome;
+import org.cchmc.bmi.snpomics.ReferenceMetadata;
 import org.cchmc.bmi.snpomics.annotation.ReferenceAnnotation;
 import org.cchmc.bmi.snpomics.annotation.importer.AnnotationImporter;
 import org.cchmc.bmi.snpomics.annotation.loader.AnnotationLoader;
@@ -15,29 +17,42 @@ import org.cchmc.bmi.snpomics.exception.GenomeNotSetException;
 import org.cchmc.bmi.snpomics.exception.UnknownGenomeException;
 
 public class DummyFactory extends AnnotationFactory {
-	private Set<String> validGenomes;
+	private Map<String, Genome> validGenomes;
 	private String currentGenome;
 	public DummyFactory() {
-		validGenomes = new HashSet<String>();
-		validGenomes.add("dummy");
+		validGenomes = new HashMap<String, Genome>();
+		validGenomes.put("dummy", new Genome("dummy", "Dum dummicus", 0, "http://localhost"));
 		currentGenome = null;
 	}
 
 	@Override
-	public List<String> getAvailableGenomes() {
-		return new ArrayList<String>(validGenomes);
+	public Set<Genome> getAvailableGenomes() {
+		return new HashSet<Genome>(validGenomes.values());
 	}
 
 	@Override
 	public void setGenome(String genome) {
-		if (!validGenomes.contains(genome))
+		if (!validGenomes.containsKey(genome))
 			throw new UnknownGenomeException();
 		currentGenome = genome;
 	}
 
 	@Override
+	public void createGenome(Genome newGenome) {
+		validGenomes.put(newGenome.getName(), newGenome);
+		currentGenome = newGenome.getName();
+	}
+	
+	@Override
+	public Genome getGenome() {
+		if (currentGenome == null)
+			return null;
+		return validGenomes.get(currentGenome);
+	}
+
+	@Override
 	public <T extends ReferenceAnnotation> AnnotationLoader<T> getLoader(Class<T> cls,
-			String table) throws AnnotationNotFoundException {
+			String version) throws AnnotationNotFoundException {
 		if (currentGenome == null)
 			throw new GenomeNotSetException();
 		//No reference annotations!
@@ -45,29 +60,28 @@ public class DummyFactory extends AnnotationFactory {
 	}
 
 	@Override
-	public List<String> getAvailableTables(Class<? extends ReferenceAnnotation> cls) {
+	public <T extends ReferenceAnnotation> List<ReferenceMetadata<T>> getAvailableVersions(Class<T> cls) {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public String getDefaultTable(Class<? extends ReferenceAnnotation> cls) {
+	public <T extends ReferenceAnnotation> ReferenceMetadata<T> getDefaultVersion(Class<T> cls) {
 		return null;
 	}
 
 	@Override
-	public void setDefaultTable(Class<? extends ReferenceAnnotation> cls, String table) {
+	public void setDefaultVersion(Class<? extends ReferenceAnnotation> cls, String version) {
 	}
 
 	@Override
 	protected <T extends ReferenceAnnotation> AnnotationImporter<T> getImporter(
-			Class<T> cls) {
+			ReferenceMetadata<T> ref) {
 		return null;
 	}
 
 	@Override
-	public boolean importData(InputStream input, String table,
-			Class<? extends ReferenceAnnotation> cls) {
-		return false;
+	public void makeVersionPermanentDefault(
+			Class<? extends ReferenceAnnotation> cls, String version) {
 	}
 
 }

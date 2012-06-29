@@ -21,4 +21,10 @@ public interface Annotator<T extends InteractiveAnnotation> {
 	 * @throws AnnotationNotFoundException a required reference annotation could not be loaded
 	 */
 	List<T> annotate(SimpleVariant variant, AnnotationFactory factory) throws AnnotationNotFoundException;
+	
+	/**
+	 * Exposes the class of the Annotations we create
+	 * @return
+	 */
+	Class<T> getAnnotationClass();
 }

@@ -12,19 +12,25 @@ public class VertebrateMitoGeneticCode extends GeneticCode {
 		return AminoAcid.UNK;
 	}
 	
+	/**
+	 * Both AGA and AGG are listed as "valid", though that's not precisely true.  In reality, the
+	 * mitoribosome slips backward one nucleotide, and the actual codon that is translated is UAG,
+	 * an actual Stop.  However, for purposes of validating gene CDSs, we'll call it valid.  These
+	 * only happen in CO1 and ND6 (human), but I'm going to call that a common case
+	 */
 	@Override
 	public boolean isValidStop(String codon) {
-		//AGA and AGG do not encode stops, but there are genes where a slip happens during translation
-		//and the machinery ends up "seeing" TAG.
-		//The codons can't be assigned to Stop in the general case, because I don't want to misidentify 
-		//a missense mutation as nonsense
-		return codon.equals("TAA") || codon.equals("TAG") || codon.equals("AGA") || codon.equals("AGG");
+		return super.isValidStop(codon) || codon.equals("AGA") || codon.equals("AGG");
 	}
 	
+	/**
+	 * Start codons vary somewhat among species.  Humans can also start at AUU, and mice at
+	 * AUU or AUC
+	 */
 	@Override
 	public boolean isValidStart(String codon) {
 		//ATG and ATA are Met, ATT is also valid in humans
-		return codon.equals("ATG") || codon.equals("ATA") || codon.equals("ATT");
+		return super.isValidStart(codon) || codon.equals("ATT") || codon.equals("ATC");
 	}
 	
 	private static HashMap<String, AminoAcid> table;

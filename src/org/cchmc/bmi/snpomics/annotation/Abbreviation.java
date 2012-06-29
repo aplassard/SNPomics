@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Intended for Annotations, the Abbreviation should be unique among annotations and contain no
+ * Intended for {@link OutputField OutputFields}, the Abbreviation should be unique and contain no
  * whitespace or special characters.  Most likely place to see this is in a VCF file
  * @author dexzb9
  *

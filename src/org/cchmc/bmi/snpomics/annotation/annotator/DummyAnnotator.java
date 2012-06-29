@@ -28,4 +28,9 @@ public class DummyAnnotator implements Annotator<DummyAnnotation> {
 		return result;
 	}
 
+	@Override
+	public Class<DummyAnnotation> getAnnotationClass() {
+		return DummyAnnotation.class;
+	}
+
 }
