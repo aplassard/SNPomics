@@ -69,7 +69,7 @@ public class HgvsDnaAnnotator implements Annotator<HgvsDnaName> {
 			//In an exon: Coding nts are a positive number, 5' UTR are negative, 3' UTR are positive but prefixed with '*'
 			int pos = 1;
 			for (GenomicSpan x : tx.getExons()) {
-				if (x.getEnd() <= genomicCoord)
+				if (x.getEnd() < genomicCoord)
 					pos += x.length();
 				else if (x.getStart() < genomicCoord)
 					pos += genomicCoord - x.getStart();
