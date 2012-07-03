@@ -2,7 +2,7 @@ package org.cchmc.bmi.snpomics.annotation.importer;
 
 import java.io.Reader;
 
-import org.cchmc.bmi.snpomics.annotation.ReferenceAnnotation;
+import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
 
 /**
  * Loads annotations into a datastore (ie, sql database).  This is a very simple interface,

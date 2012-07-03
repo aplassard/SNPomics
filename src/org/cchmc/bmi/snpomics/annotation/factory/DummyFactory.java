@@ -9,9 +9,9 @@ import java.util.Set;
 
 import org.cchmc.bmi.snpomics.Genome;
 import org.cchmc.bmi.snpomics.ReferenceMetadata;
-import org.cchmc.bmi.snpomics.annotation.ReferenceAnnotation;
 import org.cchmc.bmi.snpomics.annotation.importer.AnnotationImporter;
 import org.cchmc.bmi.snpomics.annotation.loader.AnnotationLoader;
+import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
 import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
 import org.cchmc.bmi.snpomics.exception.GenomeNotSetException;
 import org.cchmc.bmi.snpomics.exception.UnknownGenomeException;

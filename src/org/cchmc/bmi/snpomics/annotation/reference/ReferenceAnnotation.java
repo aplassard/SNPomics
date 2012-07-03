@@ -1,4 +1,4 @@
-package org.cchmc.bmi.snpomics.annotation;
+package org.cchmc.bmi.snpomics.annotation.reference;
 
 /**
  * <p>A ReferenceAnnotation is an annotation that exists independent of any Variants - ie,

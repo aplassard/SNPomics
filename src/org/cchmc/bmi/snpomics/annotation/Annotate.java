@@ -9,6 +9,9 @@ import org.cchmc.bmi.snpomics.annotation.annotator.Annotator;
 import org.cchmc.bmi.snpomics.annotation.annotator.DummyAnnotator;
 import org.cchmc.bmi.snpomics.annotation.annotator.OverlappingAnnotator;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
+import org.cchmc.bmi.snpomics.annotation.interactive.DummyAnnotation;
+import org.cchmc.bmi.snpomics.annotation.interactive.InteractiveAnnotation;
+import org.cchmc.bmi.snpomics.annotation.interactive.OverlappingGeneAnnotation;
 import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
 
 /**

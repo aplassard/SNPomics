@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.cchmc.bmi.snpomics.SimpleVariant;
-import org.cchmc.bmi.snpomics.annotation.OverlappingGeneAnnotation;
-import org.cchmc.bmi.snpomics.annotation.TranscriptAnnotation;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
+import org.cchmc.bmi.snpomics.annotation.interactive.OverlappingGeneAnnotation;
 import org.cchmc.bmi.snpomics.annotation.loader.TranscriptLoader;
+import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
 import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
 
 public class OverlappingAnnotator implements

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.cchmc.bmi.snpomics.SimpleVariant;
-import org.cchmc.bmi.snpomics.annotation.DummyAnnotation;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
+import org.cchmc.bmi.snpomics.annotation.interactive.DummyAnnotation;
 import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
 
 public class DummyAnnotator implements Annotator<DummyAnnotation> {

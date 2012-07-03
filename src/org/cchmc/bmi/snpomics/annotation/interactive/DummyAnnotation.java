@@ -1,4 +1,4 @@
-package org.cchmc.bmi.snpomics.annotation;
+package org.cchmc.bmi.snpomics.annotation.interactive;
 
 
 public class DummyAnnotation implements InteractiveAnnotation {

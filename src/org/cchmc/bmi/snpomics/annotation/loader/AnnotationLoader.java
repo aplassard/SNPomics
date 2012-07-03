@@ -2,8 +2,8 @@ package org.cchmc.bmi.snpomics.annotation.loader;
 
 import java.util.List;
 
-import org.cchmc.bmi.snpomics.annotation.ReferenceAnnotation;
 import org.cchmc.bmi.snpomics.annotation.importer.AnnotationImporter;
+import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
 
 /**
  * An interface to the underlying data store that can retrieve specific annotations.

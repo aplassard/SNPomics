@@ -3,7 +3,7 @@ package org.cchmc.bmi.snpomics.annotation.loader;
 import java.util.List;
 
 import org.cchmc.bmi.snpomics.GenomicSpan;
-import org.cchmc.bmi.snpomics.annotation.MappedAnnotation;
+import org.cchmc.bmi.snpomics.annotation.reference.MappedAnnotation;
 
 /**
  * An augmented {@link AnnotationLoader} that can retrieve MappedAnnotations

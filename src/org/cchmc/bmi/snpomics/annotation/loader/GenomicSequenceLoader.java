@@ -1,4 +1,4 @@
-package org.cchmc.bmi.snpomics.annotation.importer;
+package org.cchmc.bmi.snpomics.annotation.loader;
 
 import java.io.File;
 import java.sql.PreparedStatement;
@@ -9,9 +9,7 @@ import java.util.List;
 
 import org.cchmc.bmi.snpomics.Genome;
 import org.cchmc.bmi.snpomics.GenomicSpan;
-import org.cchmc.bmi.snpomics.annotation.GenomicSequenceAnnotation;
-import org.cchmc.bmi.snpomics.annotation.loader.JdbcLoader;
-import org.cchmc.bmi.snpomics.annotation.loader.MappedAnnotationLoader;
+import org.cchmc.bmi.snpomics.annotation.reference.GenomicSequenceAnnotation;
 import org.cchmc.bmi.snpomics.util.FastaReader;
 
 public class GenomicSequenceLoader extends

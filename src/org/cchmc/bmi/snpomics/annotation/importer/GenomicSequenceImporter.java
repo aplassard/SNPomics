@@ -7,7 +7,7 @@ import java.io.Reader;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.cchmc.bmi.snpomics.annotation.GenomicSequenceAnnotation;
+import org.cchmc.bmi.snpomics.annotation.reference.GenomicSequenceAnnotation;
 import org.cchmc.bmi.snpomics.exception.UncheckedSnpomicsException;
 
 public class GenomicSequenceImporter extends

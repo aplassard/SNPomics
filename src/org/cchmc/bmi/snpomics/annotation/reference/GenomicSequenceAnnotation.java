@@ -1,7 +1,8 @@
-package org.cchmc.bmi.snpomics.annotation;
+package org.cchmc.bmi.snpomics.annotation.reference;
 
 import org.cchmc.bmi.snpomics.GenomicSpan;
 
+@AnnotationType("sequence")
 public class GenomicSequenceAnnotation implements MappedAnnotation {
 
 	public GenomicSequenceAnnotation(GenomicSpan span, String sequence) {

@@ -10,11 +10,11 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.cchmc.bmi.snpomics.annotation.Annotate;
-import org.cchmc.bmi.snpomics.annotation.AnnotationType;
-import org.cchmc.bmi.snpomics.annotation.InteractiveAnnotation;
-import org.cchmc.bmi.snpomics.annotation.ReferenceAnnotation;
 import org.cchmc.bmi.snpomics.annotation.annotator.Annotator;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
+import org.cchmc.bmi.snpomics.annotation.interactive.InteractiveAnnotation;
+import org.cchmc.bmi.snpomics.annotation.reference.AnnotationType;
+import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
 import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
 import org.cchmc.bmi.snpomics.reader.InputIterator;
 import org.cchmc.bmi.snpomics.writer.VariantWriter;
@@ -62,7 +62,7 @@ public class SnpomicsEngine {
 	 */
 	public static Map<String, OutputField> getAllowedOutput() {
 		Map<String, OutputField> result = new HashMap<String, OutputField>();
-		Reflections reflections = new Reflections("org.cchmc.bmi.snpomics.annotation");
+		Reflections reflections = new Reflections("org.cchmc.bmi.snpomics.annotation.interactive");
 		for (Class<? extends InteractiveAnnotation> cls : reflections.getSubTypesOf(InteractiveAnnotation.class)) {
 			for (Method meth : cls.getMethods()) {
 				if (OutputField.isOutputField(meth)) {
@@ -80,7 +80,7 @@ public class SnpomicsEngine {
 	
 	public static Map<String, Class<? extends ReferenceAnnotation>> getAnnotations() {
 		Map<String, Class<? extends ReferenceAnnotation>> result = new HashMap<String, Class<? extends ReferenceAnnotation>>();
-		Reflections reflections = new Reflections("org.cchmc.bmi.snpomics.annotation");
+		Reflections reflections = new Reflections("org.cchmc.bmi.snpomics.annotation.reference");
 		for (Class<? extends ReferenceAnnotation> cls : reflections.getSubTypesOf(ReferenceAnnotation.class)) {
 			AnnotationType name = cls.getAnnotation(AnnotationType.class);
 			if (name != null) {

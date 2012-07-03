@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.cchmc.bmi.snpomics.annotation.ReferenceAnnotation;
+import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
 
 public abstract class JdbcImporter<T extends ReferenceAnnotation> implements
 		AnnotationImporter<T> {

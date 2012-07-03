@@ -1,9 +1,9 @@
 package org.cchmc.bmi.snpomics;
 
-import org.cchmc.bmi.snpomics.annotation.GenomicSequenceAnnotation;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.annotation.factory.JdbcFactory;
-import org.cchmc.bmi.snpomics.annotation.importer.GenomicSequenceLoader;
+import org.cchmc.bmi.snpomics.annotation.loader.GenomicSequenceLoader;
+import org.cchmc.bmi.snpomics.annotation.reference.GenomicSequenceAnnotation;
 
 public class Test {
 

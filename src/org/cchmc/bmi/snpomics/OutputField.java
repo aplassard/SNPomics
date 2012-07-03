@@ -3,10 +3,10 @@ package org.cchmc.bmi.snpomics;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.cchmc.bmi.snpomics.annotation.Abbreviation;
-import org.cchmc.bmi.snpomics.annotation.Description;
-import org.cchmc.bmi.snpomics.annotation.InteractiveAnnotation;
-import org.cchmc.bmi.snpomics.annotation.ShortName;
+import org.cchmc.bmi.snpomics.annotation.interactive.Abbreviation;
+import org.cchmc.bmi.snpomics.annotation.interactive.Description;
+import org.cchmc.bmi.snpomics.annotation.interactive.InteractiveAnnotation;
+import org.cchmc.bmi.snpomics.annotation.interactive.ShortName;
 
 public class OutputField {
 

@@ -1,4 +1,6 @@
-package org.cchmc.bmi.snpomics.annotation;
+package org.cchmc.bmi.snpomics.annotation.interactive;
+
+import org.cchmc.bmi.snpomics.annotation.Annotate;
 
 /**
  * <p>An InteractiveAnnotation is one that "interacts" with a Variant -

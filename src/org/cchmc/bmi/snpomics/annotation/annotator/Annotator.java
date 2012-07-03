@@ -3,8 +3,8 @@ package org.cchmc.bmi.snpomics.annotation.annotator;
 import java.util.List;
 
 import org.cchmc.bmi.snpomics.SimpleVariant;
-import org.cchmc.bmi.snpomics.annotation.InteractiveAnnotation;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
+import org.cchmc.bmi.snpomics.annotation.interactive.InteractiveAnnotation;
 import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
 
 /**

@@ -3,7 +3,7 @@ package org.cchmc.bmi.snpomics;
 import java.net.URI;
 import java.util.Date;
 
-import org.cchmc.bmi.snpomics.annotation.ReferenceAnnotation;
+import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
 
 public class ReferenceMetadata<T extends ReferenceAnnotation> {
 

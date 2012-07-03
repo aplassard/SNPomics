@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.cchmc.bmi.snpomics.annotation.InteractiveAnnotation;
+import org.cchmc.bmi.snpomics.annotation.interactive.InteractiveAnnotation;
 
 public class Variant {
 	/*

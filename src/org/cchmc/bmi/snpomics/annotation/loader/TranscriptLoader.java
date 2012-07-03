@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.cchmc.bmi.snpomics.GenomicSpan;
-import org.cchmc.bmi.snpomics.annotation.TranscriptAnnotation;
+import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
 
 public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation> 
 		implements MappedAnnotationLoader<TranscriptAnnotation> {

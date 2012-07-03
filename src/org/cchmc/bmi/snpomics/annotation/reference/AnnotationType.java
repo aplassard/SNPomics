@@ -1,4 +1,4 @@
-package org.cchmc.bmi.snpomics.annotation;
+package org.cchmc.bmi.snpomics.annotation.reference;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

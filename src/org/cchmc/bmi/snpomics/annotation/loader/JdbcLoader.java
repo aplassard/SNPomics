@@ -2,7 +2,7 @@ package org.cchmc.bmi.snpomics.annotation.loader;
 
 import java.sql.Connection;
 
-import org.cchmc.bmi.snpomics.annotation.ReferenceAnnotation;
+import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
 
 public abstract class JdbcLoader<T extends ReferenceAnnotation> implements AnnotationLoader<T>{
 	public void setTableName(String table) { 

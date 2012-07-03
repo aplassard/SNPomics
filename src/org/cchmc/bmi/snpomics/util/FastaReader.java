@@ -14,6 +14,12 @@ import java.util.Map.Entry;
 import org.cchmc.bmi.snpomics.GenomicSpan;
 import org.cchmc.bmi.snpomics.exception.UncheckedSnpomicsException;
 
+/**
+ * Extracts genomic sequence from a specified fasta file.  An index (fai) must exist!
+ * Maintains an MRU cache to efficiently handle multiple requests for the same region
+ * @author dexzb9
+ *
+ */
 public class FastaReader {
 
 	public FastaReader(File fastaFile) {
@@ -56,10 +62,12 @@ public class FastaReader {
 			result = cache.get(position);
 		else {
 			try {
-				//TODO: Verify that position is entirely inside chromosome
-				//and in index
 				StringBuilder sb = new StringBuilder();
 				FaiEntry fai = index.get(position.getChromosome());
+				if (fai == null)
+					throw new UncheckedSnpomicsException("Chromosome "+position.getChromosome()+" is not in the fasta file");
+				if (position.getStart() < 1 || position.getEnd() > fai.size)
+					throw new UncheckedSnpomicsException(position.toString()+" is not contained in the fasta file (1-"+fai.size+")");
 				long start = position.getStart() - 1;
 				long linesToSkip = start / fai.basePerLine;
 				long bytesToSkip = start % fai.basePerLine;

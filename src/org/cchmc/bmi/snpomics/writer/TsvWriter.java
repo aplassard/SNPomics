@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.cchmc.bmi.snpomics.OutputField;
 import org.cchmc.bmi.snpomics.Variant;
-import org.cchmc.bmi.snpomics.annotation.InteractiveAnnotation;
+import org.cchmc.bmi.snpomics.annotation.interactive.InteractiveAnnotation;
 import org.cchmc.bmi.snpomics.reader.InputIterator;
 import org.cchmc.bmi.snpomics.util.StringUtils;
 
