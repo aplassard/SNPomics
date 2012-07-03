@@ -1,9 +1,21 @@
 package org.cchmc.bmi.snpomics;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.annotation.factory.JdbcFactory;
 import org.cchmc.bmi.snpomics.annotation.loader.GenomicSequenceLoader;
 import org.cchmc.bmi.snpomics.annotation.reference.GenomicSequenceAnnotation;
+import org.cchmc.bmi.snpomics.reader.InputIterator;
+import org.cchmc.bmi.snpomics.reader.VCFReader;
+import org.cchmc.bmi.snpomics.writer.TsvWriter;
+import org.cchmc.bmi.snpomics.writer.VariantWriter;
 
 public class Test {
 
@@ -38,12 +50,12 @@ public class Test {
 			rmd.setSource("http://www.ncbi.nlm.nih.gov/projects/genome/assembly/grc/human/index.shtml");
 			rmd.setUpdateDate(new Date());
 			factory.importData(new StringReader("human_g1k_v37.fasta"), rmd);*/
-			GenomicSequenceLoader loader = (GenomicSequenceLoader) factory.getLoader(GenomicSequenceAnnotation.class);
+			/*GenomicSequenceLoader loader = (GenomicSequenceLoader) factory.getLoader(GenomicSequenceAnnotation.class);
 			getSequence(loader, "1:1456623-1456680");
 			getSequence(loader, "11:1456623-1456780");
-			getSequence(loader, "2:1456623");
+			getSequence(loader, "2:1456623");*/
 
-			/*InputIterator input = new VCFReader(new BufferedReader(new FileReader(args[0])));
+			InputIterator input = new VCFReader(new BufferedReader(new FileReader(args[0])));
 			VariantWriter output = new TsvWriter(new PrintWriter(new FileWriter(args[1])));
 			//VariantWriter output = new TsvWriter(new PrintWriter(System.out));
 			
@@ -51,8 +63,9 @@ public class Test {
 			
 			List<OutputField> desiredAnnotations = new ArrayList<OutputField>();
 			desiredAnnotations.add(potentialFields.get("Gene Name"));
+			desiredAnnotations.add(potentialFields.get("cDNA variation"));
 			
-			SnpomicsEngine.run(input, output, factory, desiredAnnotations);*/
+			SnpomicsEngine.run(input, output, factory, desiredAnnotations);
 			
 			
 /*			AnnotationFactory factory = new DummyFactory();

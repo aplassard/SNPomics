@@ -27,11 +27,7 @@ public class TranscriptAnnotation implements MappedAnnotation {
 		return onForwardStrand;
 	}
 
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
+	public void setID(String id) {
 		this.id = id;
 	}
 
@@ -41,10 +37,6 @@ public class TranscriptAnnotation implements MappedAnnotation {
 
 	public void setProtID(String protID) {
 		this.protID = protID;
-	}
-
-	public GenomicSpan getPos() {
-		return pos;
 	}
 
 	public void setPosition(GenomicSpan pos) {
@@ -79,7 +71,7 @@ public class TranscriptAnnotation implements MappedAnnotation {
 		return cds.length() > 0;
 	}
 	public boolean overlaps(GenomicSpan span) {
-		return getPos().overlaps(span);
+		return getPosition().overlaps(span);
 	}
 	public boolean exonOverlaps(GenomicSpan span) {
 		for (GenomicSpan x : exons) {
@@ -89,7 +81,7 @@ public class TranscriptAnnotation implements MappedAnnotation {
 		return false;
 	}
 	public boolean contains(GenomicSpan span) {
-		return getPos().contains(span);
+		return getPosition().contains(span);
 	}
 	public boolean exonContains(GenomicSpan span) {
 		for (GenomicSpan x : exons)
@@ -98,7 +90,50 @@ public class TranscriptAnnotation implements MappedAnnotation {
 		return false;
 	}
 	public boolean isCoding(GenomicSpan region) {
-		return this.cds.overlaps(region) && exonOverlaps(region);
+		return cds.overlaps(region) && exonOverlaps(region);
+	}
+	public int length() {
+		if (length > 0) return length;
+		length = 0;
+		for (GenomicSpan x : exons)
+			length += x.length();
+		return length;
+	}
+	public int get5UtrLength() {
+		if (!areUTRsCalculated) calculateUTRs();
+		return utr5Length;
+	}
+	public int get3UtrLength() {
+		if (!areUTRsCalculated) calculateUTRs();
+		return utr3Length;
+	}
+	public int getCdsLength() {
+		if (!areUTRsCalculated) calculateUTRs();
+		return length() - utr5Length - utr3Length;
+	}
+	private void calculateUTRs() {
+		if (areUTRsCalculated) return;
+		utr5Length = utr3Length = 0;
+		areUTRsCalculated = true;
+		//No UTR if the whole thing is untranslated
+		if (!isProteinCoding()) return;
+		for (GenomicSpan x : exons) {
+			//For each UTR, either add the entire exon or just the untranslated portion
+			if (x.getEnd() < cds.getStart())
+				utr5Length += x.length();
+			else if (x.getStart() < cds.getStart())
+				utr5Length += cds.getStart() - x.getStart();
+			
+			if (x.getStart() > cds.getEnd())
+				utr3Length += x.length();
+			else if (x.getEnd() > cds.getEnd())
+				utr3Length += x.getEnd() - cds.getEnd();
+		}
+		if (!isOnForwardStrand()) {
+			int temp = utr5Length;
+			utr5Length = utr3Length;
+			utr3Length = temp;
+		}
 	}
 
 	private String id; //transcript
@@ -108,4 +143,7 @@ public class TranscriptAnnotation implements MappedAnnotation {
 	private GenomicSpan cds;
 	private boolean onForwardStrand;
 	private List<GenomicSpan> exons;
+	private int utr5Length, utr3Length;
+	private int length = 0;
+	private boolean areUTRsCalculated = false;
 }

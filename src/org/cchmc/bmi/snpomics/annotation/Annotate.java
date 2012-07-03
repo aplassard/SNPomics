@@ -1,15 +1,16 @@
 package org.cchmc.bmi.snpomics.annotation;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.cchmc.bmi.snpomics.SimpleVariant;
 import org.cchmc.bmi.snpomics.Variant;
 import org.cchmc.bmi.snpomics.annotation.annotator.Annotator;
 import org.cchmc.bmi.snpomics.annotation.annotator.DummyAnnotator;
+import org.cchmc.bmi.snpomics.annotation.annotator.HgvsDnaAnnotator;
 import org.cchmc.bmi.snpomics.annotation.annotator.OverlappingAnnotator;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.annotation.interactive.DummyAnnotation;
+import org.cchmc.bmi.snpomics.annotation.interactive.HgvsDnaName;
 import org.cchmc.bmi.snpomics.annotation.interactive.InteractiveAnnotation;
 import org.cchmc.bmi.snpomics.annotation.interactive.OverlappingGeneAnnotation;
 import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
@@ -32,6 +33,8 @@ public class Annotate {
 			return new DummyAnnotator();
 		if (cls == OverlappingGeneAnnotation.class)
 			return new OverlappingAnnotator();
+		if (cls == HgvsDnaName.class)
+			return new HgvsDnaAnnotator();
 		return null;
 	}
 	
@@ -50,7 +53,7 @@ public class Annotate {
 			AnnotationFactory factory) throws AnnotationNotFoundException {
 		Annotator<? extends InteractiveAnnotation> annotator = getAnnotator(cls, factory);
 		if (annotator == null)
-			return Collections.emptyList();
+			throw new AnnotationNotFoundException(cls.getCanonicalName());
 		return annotator.annotate(variant, factory);
 	}
 }

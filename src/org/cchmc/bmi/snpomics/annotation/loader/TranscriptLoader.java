@@ -118,7 +118,7 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 	private TranscriptAnnotation createTranscriptFromRS(ResultSet rs) {
 		TranscriptAnnotation tx = new TranscriptAnnotation();
 		try {
-			tx.setId(rs.getString("id"));
+			tx.setID(rs.getString("id"));
 			tx.setName(rs.getString("gene"));
 			tx.setProtID(rs.getString("protein"));
 			GenomicSpan pos = new GenomicSpan(rs.getString("chrom"), rs.getLong("txStart"), 
