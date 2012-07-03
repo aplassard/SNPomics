@@ -1,6 +1,6 @@
 package org.cchmc.bmi.snpomics.annotation.importer;
 
-import java.io.InputStream;
+import java.io.Reader;
 
 import org.cchmc.bmi.snpomics.annotation.ReferenceAnnotation;
 
@@ -19,5 +19,5 @@ public interface AnnotationImporter<T extends ReferenceAnnotation> {
 	 * @param input the actual data to import
 	 * @return true on success
 	 */
-	boolean importAnnotations(InputStream input);
+	boolean importAnnotations(Reader input);
 }

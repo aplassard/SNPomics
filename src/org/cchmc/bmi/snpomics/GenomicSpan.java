@@ -169,6 +169,11 @@ public final class GenomicSpan implements Comparable<GenomicSpan>, Cloneable {
 		}
 		return sb.toString();
 	}
+	
+	@Override
+	public int hashCode() {
+		return (int) (41*chromosome.hashCode()+13*start+end);
+	}
 
 	public static GenomicSpan parseSpan(String str) {
 		final GenomicSpan gs = new GenomicSpan();

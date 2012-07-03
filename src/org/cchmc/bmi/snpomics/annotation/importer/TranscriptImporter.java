@@ -2,8 +2,7 @@ package org.cchmc.bmi.snpomics.annotation.importer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.Reader;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -41,9 +40,9 @@ import org.cchmc.bmi.snpomics.util.StringUtils;
 public class TranscriptImporter extends JdbcImporter<TranscriptAnnotation> {
 
 	@Override
-	public boolean importAnnotations(InputStream input) {
+	public boolean importAnnotations(Reader input) {
 		createTable();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+		BufferedReader reader = new BufferedReader(input);
 		PreparedStatement stat = null;
 		String line;
 		try {

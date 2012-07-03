@@ -75,6 +75,32 @@ public class TranscriptAnnotation implements MappedAnnotation {
 		this.onForwardStrand = onForwardStrand;
 	}
 
+	public boolean isProteinCoding() {
+		return cds.length() > 0;
+	}
+	public boolean overlaps(GenomicSpan span) {
+		return getPos().overlaps(span);
+	}
+	public boolean exonOverlaps(GenomicSpan span) {
+		for (GenomicSpan x : exons) {
+			if (x.overlaps(span))
+				return true;
+		}
+		return false;
+	}
+	public boolean contains(GenomicSpan span) {
+		return getPos().contains(span);
+	}
+	public boolean exonContains(GenomicSpan span) {
+		for (GenomicSpan x : exons)
+			if (x.contains(span))
+				return true;
+		return false;
+	}
+	public boolean isCoding(GenomicSpan region) {
+		return this.cds.overlaps(region) && exonOverlaps(region);
+	}
+
 	private String id; //transcript
 	private String name; //gene
 	private String protID; //protein

@@ -1,6 +1,6 @@
 package org.cchmc.bmi.snpomics.annotation.factory;
 
-import java.io.InputStream;
+import java.io.Reader;
 import java.util.List;
 import java.util.Set;
 
@@ -122,7 +122,7 @@ public abstract class AnnotationFactory {
 	 * @param ref the metadata for the data to be imported
 	 * @return true on success
 	 */
-	public boolean importData(InputStream input, ReferenceMetadata<? extends ReferenceAnnotation> ref) {
+	public boolean importData(Reader input, ReferenceMetadata<? extends ReferenceAnnotation> ref) {
 		return getImporter(ref).importAnnotations(input);
 	}
 }

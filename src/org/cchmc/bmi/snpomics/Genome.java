@@ -1,9 +1,12 @@
 package org.cchmc.bmi.snpomics;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.cchmc.bmi.snpomics.exception.UncheckedSnpomicsException;
 
 public class Genome {
 	
@@ -88,6 +91,16 @@ public class Genome {
 		return getClass().getName()+"["+name+"]";
 	}
 	
+	public static String getReferencePath() {
+		String path = SnpomicsEngine.getProperty("fastapath");
+		if (path == null)
+			throw new UncheckedSnpomicsException("fastapath not specified");
+		return path;
+	}
+	
+	public static File getReferenceDirectory() {
+		return new File(getReferencePath());
+	}
 	
 	private final String name;
 	private final String organism;

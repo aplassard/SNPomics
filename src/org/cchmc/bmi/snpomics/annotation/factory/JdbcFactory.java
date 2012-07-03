@@ -1,6 +1,6 @@
 package org.cchmc.bmi.snpomics.annotation.factory;
 
-import java.io.InputStream;
+import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -18,8 +18,11 @@ import java.util.UUID;
 import org.cchmc.bmi.snpomics.Genome;
 import org.cchmc.bmi.snpomics.ReferenceMetadata;
 import org.cchmc.bmi.snpomics.SnpomicsEngine;
+import org.cchmc.bmi.snpomics.annotation.GenomicSequenceAnnotation;
 import org.cchmc.bmi.snpomics.annotation.ReferenceAnnotation;
 import org.cchmc.bmi.snpomics.annotation.TranscriptAnnotation;
+import org.cchmc.bmi.snpomics.annotation.importer.GenomicSequenceImporter;
+import org.cchmc.bmi.snpomics.annotation.importer.GenomicSequenceLoader;
 import org.cchmc.bmi.snpomics.annotation.importer.JdbcImporter;
 import org.cchmc.bmi.snpomics.annotation.importer.TranscriptImporter;
 import org.cchmc.bmi.snpomics.annotation.loader.JdbcLoader;
@@ -53,6 +56,8 @@ public class JdbcFactory extends AnnotationFactory {
 		ReferenceMetadata<?> rmd = new ReferenceMetadata(cls, genome, version);
 		if (cls == TranscriptAnnotation.class)
 			loader = new TranscriptLoader();
+		if (cls == GenomicSequenceAnnotation.class)
+			loader = new GenomicSequenceLoader();
 		if (loader == null)
 			throw new AnnotationNotFoundException(cls.getCanonicalName());
 		loader.setConnection(connection);
@@ -65,6 +70,8 @@ public class JdbcFactory extends AnnotationFactory {
 	protected <T extends ReferenceAnnotation> JdbcImporter<T> getImporter(ReferenceMetadata<T> ref) {
 		if (ref.getAnnotationClass() == TranscriptAnnotation.class)
 			return (JdbcImporter<T>) new TranscriptImporter();
+		if (ref.getAnnotationClass() == GenomicSequenceAnnotation.class)
+			return (JdbcImporter<T>) new GenomicSequenceImporter();
 		return null;
 	}
 
@@ -291,7 +298,7 @@ public class JdbcFactory extends AnnotationFactory {
 	}
 	
 	@Override
-	public boolean importData(InputStream input, ReferenceMetadata<? extends ReferenceAnnotation> ref) {
+	public boolean importData(Reader input, ReferenceMetadata<? extends ReferenceAnnotation> ref) {
 		//Ignore the default flag!
 		ref.setDefault(false);
 		//Add ref to our cache of rmds
