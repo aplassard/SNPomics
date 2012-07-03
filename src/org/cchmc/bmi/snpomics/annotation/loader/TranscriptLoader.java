@@ -12,6 +12,11 @@ import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
 public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation> 
 		implements MappedAnnotationLoader<TranscriptAnnotation> {
 
+	public TranscriptLoader() {
+		cache = new ArrayList<TranscriptAnnotation>();
+		cacheRegion = new GenomicSpan();
+	}
+	
 	@Override
 	public TranscriptAnnotation loadByID(String id) {
 		PreparedStatement stat = null;
@@ -60,29 +65,37 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 	@Override
 	public List<TranscriptAnnotation> loadByOverlappingPosition(GenomicSpan position) {
 		List<TranscriptAnnotation> result = new ArrayList<TranscriptAnnotation>();
-		List<Integer> bins = position.getOverlappingBins();
-		PreparedStatement stat = null;
-		ResultSet rs = null;
-		try {
-			stat = connection.prepareStatement("SELECT * FROM `"+tableName+"` WHERE chrom=?"+
-					" AND bin=? AND txEnd>=? AND txStart<=?");
-			stat.setString(1, position.getChromosome());
-			stat.setLong(3, position.getStart());
-			stat.setLong(4, position.getEnd());
-			for (Integer bin : bins) {
-				stat.setInt(2, bin);
-				rs = stat.executeQuery();
-				while (rs.next())
-					result.add(createTranscriptFromRS(rs));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return result;
-		} finally {
+		if (!cacheRegion.contains(position)) {
+			cacheRegion = new GenomicSpan(position.getChromosome(), position.getStart(), position.getEnd()+1000);
+			cache.clear();
+			List<Integer> bins = cacheRegion.getOverlappingBins();
+			PreparedStatement stat = null;
+			ResultSet rs = null;
 			try {
-				if (stat != null)
-					stat.close();
-			} catch (SQLException e) {}
+				stat = connection.prepareStatement("SELECT * FROM `"+tableName+"` WHERE chrom=?"+
+						" AND bin=? AND txEnd>=? AND txStart<=?");
+				stat.setString(1, cacheRegion.getChromosome());
+				stat.setLong(3, cacheRegion.getStart());
+				stat.setLong(4, cacheRegion.getEnd());
+				for (Integer bin : bins) {
+					stat.setInt(2, bin);
+					rs = stat.executeQuery();
+					while (rs.next())
+						cache.add(createTranscriptFromRS(rs));
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return result;
+			} finally {
+				try {
+					if (stat != null)
+						stat.close();
+				} catch (SQLException e) {}
+			}
+		}
+		for (TranscriptAnnotation tx : cache) {
+			if (tx.overlaps(position))
+				result.add(tx);
 		}
 		return result;
 	}
@@ -144,4 +157,6 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 		return tx;
 	}
 
+	private GenomicSpan cacheRegion;
+	private List<TranscriptAnnotation> cache;
 }

@@ -15,7 +15,7 @@ import org.cchmc.bmi.snpomics.util.BaseUtils;
 /*
  * TODO:
  * 	* Properly report dup instead of ins when appropriate
- *  * Left-align indels
+ *  * Right-align indels
  */
 public class HgvsDnaAnnotator implements Annotator<HgvsDnaName> {
 
@@ -25,7 +25,7 @@ public class HgvsDnaAnnotator implements Annotator<HgvsDnaName> {
 		TranscriptLoader loader = (TranscriptLoader) factory.getLoader(TranscriptAnnotation.class);
 		List<HgvsDnaName> result = new ArrayList<HgvsDnaName>();
 		for (TranscriptAnnotation tx : loader.loadByOverlappingPosition(variant.getPosition())) {
-			HgvsDnaName name = new HgvsDnaName();
+			HgvsDnaName name = new HgvsDnaName(tx);
 			name.setReference(tx.getID());
 			name.setProteinCoding(tx.isProteinCoding());
 			

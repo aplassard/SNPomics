@@ -62,12 +62,16 @@ public final class GenomicSpan implements Comparable<GenomicSpan>, Cloneable {
 	}
 
 	public boolean overlaps(GenomicSpan other) {
+		if (chromosome == null)
+			return false;
 		if (chromosome.equals(other.chromosome))
 			return (other.end > start) && (other.start < end);
 		return false;
 	}
 
 	public boolean contains(GenomicSpan other) {
+		if (chromosome == null)
+			return false;
 		if (chromosome.equals(other.chromosome))
 			return (other.start >= start) && (other.end <= end);
 		return false;

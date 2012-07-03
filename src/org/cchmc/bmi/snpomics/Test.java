@@ -65,7 +65,10 @@ public class Test {
 			desiredAnnotations.add(potentialFields.get("Gene Name"));
 			desiredAnnotations.add(potentialFields.get("cDNA variation"));
 			
+			long start = System.currentTimeMillis();
 			SnpomicsEngine.run(input, output, factory, desiredAnnotations);
+			long end = System.currentTimeMillis();
+			System.out.printf("Runtime: %.2f s\n", (float)(end-start)/1000.0);
 			
 			
 /*			AnnotationFactory factory = new DummyFactory();

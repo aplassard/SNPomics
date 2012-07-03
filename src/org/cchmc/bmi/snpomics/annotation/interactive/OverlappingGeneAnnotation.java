@@ -8,9 +8,9 @@ public class OverlappingGeneAnnotation implements InteractiveAnnotation {
 		this.tx = tx;
 	}
 	
-	@Abbreviation("GENE")
+	/*@Abbreviation("GENE")
 	@ShortName("Gene Name")
-	@Description("Name of overlapping gene(s)")
+	@Description("Name of overlapping gene(s)")*/
 	public String getGeneName() {
 		return tx.getName();
 	}

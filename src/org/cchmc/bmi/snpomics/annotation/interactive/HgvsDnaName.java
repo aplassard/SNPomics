@@ -1,5 +1,7 @@
 package org.cchmc.bmi.snpomics.annotation.interactive;
 
+import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
+
 /**
  * A description of the variant relative to a gene, following HGVS nomenclature (ie c.76A>C or c.76_77insT).
  * The description is built up from the component parts, which must be separately supplied.  
@@ -8,7 +10,8 @@ package org.cchmc.bmi.snpomics.annotation.interactive;
  */
 public class HgvsDnaName implements InteractiveAnnotation {
 
-	public HgvsDnaName() {
+	public HgvsDnaName(TranscriptAnnotation tx) {
+		this.tx = tx;
 		name = null;
 		prefix = "c";
 		endCoord = null;
@@ -27,6 +30,13 @@ public class HgvsDnaName implements InteractiveAnnotation {
 		return name;
 	}
 	
+	@Abbreviation("GENE")
+	@ShortName("Gene Name")
+	@Description("Name of overlapping gene(s)")
+	public String getGeneName() {
+		return tx.getName();
+	}
+
 	public void setReference(String reference) {
 		this.reference = reference;
 	}
@@ -85,6 +95,7 @@ public class HgvsDnaName implements InteractiveAnnotation {
 		name = sb.toString();
 	}
 	
+	private TranscriptAnnotation tx;
 	private String name;
 	private String reference;
 	private String prefix;
