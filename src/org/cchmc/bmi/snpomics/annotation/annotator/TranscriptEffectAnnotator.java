@@ -7,28 +7,27 @@ import org.cchmc.bmi.snpomics.GenomicSpan;
 import org.cchmc.bmi.snpomics.SimpleVariant;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.annotation.interactive.HgvsDnaName;
+import org.cchmc.bmi.snpomics.annotation.interactive.TranscriptEffectAnnotation;
+import org.cchmc.bmi.snpomics.annotation.loader.GenomicSequenceLoader;
 import org.cchmc.bmi.snpomics.annotation.loader.TranscriptLoader;
+import org.cchmc.bmi.snpomics.annotation.reference.GenomicSequenceAnnotation;
 import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
 import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
+import org.cchmc.bmi.snpomics.translation.AminoAcid;
+import org.cchmc.bmi.snpomics.translation.GeneticCode;
 import org.cchmc.bmi.snpomics.util.BaseUtils;
 
-/*
- * TODO:
- * 	* Properly report dup instead of ins when appropriate
- *  * Right-align indels
- */
-public class HgvsDnaAnnotator implements Annotator<HgvsDnaName> {
+public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnnotation> {
 
 	@Override
-	public List<HgvsDnaName> annotate(SimpleVariant variant,
+	public List<TranscriptEffectAnnotation> annotate(SimpleVariant variant,
 			AnnotationFactory factory) throws AnnotationNotFoundException {
 		TranscriptLoader loader = (TranscriptLoader) factory.getLoader(TranscriptAnnotation.class);
-		List<HgvsDnaName> result = new ArrayList<HgvsDnaName>();
+		GenomicSequenceLoader seqLoader = (GenomicSequenceLoader) factory.getLoader(GenomicSequenceAnnotation.class);
+		GeneticCode code = GeneticCode.getTable(factory.getGenome().getTransTableId(variant.getPosition().getChromosome()));
+		List<TranscriptEffectAnnotation> result = new ArrayList<TranscriptEffectAnnotation>();
 		for (TranscriptAnnotation tx : loader.loadByOverlappingPosition(variant.getPosition())) {
-			HgvsDnaName name = new HgvsDnaName(tx);
-			name.setReference(tx.getID());
-			name.setProteinCoding(tx.isProteinCoding());
-			
+			TranscriptEffectAnnotation effect = new TranscriptEffectAnnotation(tx);
 			long startCoord = variant.getPosition().getStart();
 			long endCoord = variant.getPosition().getEnd();
 			String ref = variant.getRef();
@@ -39,30 +38,70 @@ public class HgvsDnaAnnotator implements Annotator<HgvsDnaName> {
 				alt = alt.substring(1);
 				startCoord += 1;
 			}
-			//If it's an insertion, adjust the coordinates to flank the new bases
-			if (ref.length() == 0) {
-				startCoord -= 1;
-				endCoord += 1;
-			}
 			//Switch strands if appropriate
+			int dir = 1;
 			if (!tx.isOnForwardStrand()) {
 				ref = BaseUtils.reverseComplement(ref);
 				alt = BaseUtils.reverseComplement(alt);
 				long temp = startCoord;
 				startCoord = endCoord;
 				endCoord = temp;
+				dir = -1;
+			}
+			effect.setCdnaRefAllele(ref);
+			effect.setCdnaAltAllele(alt);
+			//Insertions are given the flanking coordinates
+			if (ref.isEmpty()) {
+				effect.setCdnaStartCoord(getHgvsCoord(tx, startCoord-dir));
+				effect.setCdnaEndCoord(getHgvsCoord(tx, endCoord+dir));
+			} else {
+				effect.setCdnaStartCoord(getHgvsCoord(tx, startCoord));
+				if (endCoord != startCoord)
+					effect.setCdnaEndCoord(getHgvsCoord(tx, endCoord));
+			}
+			HgvsDnaName dna = effect.getHgvsCdnaObject();
+			if (dna.isCoding()) {
+				int cdnaStart = dna.getNearestCodingNtToStart();
+				int cdnaEnd = dna.getNearestCodingNtToEnd();
+				//Revert the insertion coordinates
+				//BUG: What about cases like c.132-1_132insG?  This code will improperly
+				//change cdnaStart/End to 133/131
+				if (ref.isEmpty()) {
+					cdnaStart++;
+					cdnaEnd--;
+				}
+				String cdsSeq = getCDS(seqLoader, tx);
+				int codonStart = (cdnaStart-1) / 3 + 1;
+				int codonEnd = (cdnaEnd-1) / 3 + 1;
+				if (codonStart > 1) codonStart--;
+				if (codonEnd*3 < cdsSeq.length()) codonEnd++;
+				effect.setProtStartPos(codonStart);
+				String refDNA = cdsSeq.substring((codonStart-1)*3, codonEnd*3);
+				String altDNA = refDNA.substring(0, cdnaStart-(codonStart-1)*3-1) +
+								alt +
+								refDNA.substring(cdnaEnd-(codonStart-1)*3);
+				List<AminoAcid> refAA = code.translate(refDNA);
+				effect.setProtRefAllele(refAA);
+				if (Math.abs(alt.length()-ref.length()) % 3 != 0) {
+					effect.setProtFrameshift(true);
+					altDNA += cdsSeq.substring(codonEnd*3);
+				}
+				effect.setProtExtension(code.translate(cdsSeq.substring(codonEnd*3)));
+				effect.setProtAltAllele(code.translate(altDNA));
 			}
 			
-			name.setRefAllele(ref);
-			name.setAltAllele(alt);
-			name.setStartCoordinate(getHgvsCoord(tx, startCoord));
-			if (endCoord != startCoord)
-				name.setEndCoordinate(getHgvsCoord(tx, endCoord));
-			result.add(name);
+			result.add(effect);
 		}
 		return result;
 	}
-	
+
+	/**
+	 * Generates the HGVS-style coordinate of a position in genomic coordinates relative
+	 * to the cDNA represented by tx
+	 * @param tx
+	 * @param genomicCoord
+	 * @return
+	 */
 	private String getHgvsCoord(TranscriptAnnotation tx, long genomicCoord) {
 		GenomicSpan span = new GenomicSpan(tx.getPosition().getChromosome(), genomicCoord);
 		if (tx.exonContains(span)) {
@@ -120,9 +159,32 @@ public class HgvsDnaAnnotator implements Annotator<HgvsDnaName> {
 		}
 	}
 
+	/**
+	 * Loads the CDS sequence for tx
+	 * @param loader
+	 * @param tx
+	 * @return
+	 */
+	private String getCDS(GenomicSequenceLoader loader, TranscriptAnnotation tx) {
+		StringBuilder sb = new StringBuilder();
+		GenomicSpan cds = tx.getCds();
+		for (GenomicSpan x : tx.getExons()) {
+			if (cds.overlaps(x)) {
+				List<GenomicSequenceAnnotation> gsa = loader.loadByExactPosition(cds.intersect(x));
+				sb.append(gsa.get(0).getSequence());
+			}
+		}
+		String result;
+		if (tx.isOnForwardStrand())
+			result = sb.toString();
+		else
+			result = BaseUtils.reverseComplement(sb.toString());
+		return result;
+	}
+
 	@Override
-	public Class<HgvsDnaName> getAnnotationClass() {
-		return HgvsDnaName.class;
+	public Class<TranscriptEffectAnnotation> getAnnotationClass() {
+		return TranscriptEffectAnnotation.class;
 	}
 
 }

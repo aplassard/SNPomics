@@ -110,6 +110,7 @@ public class JdbcFactory extends AnnotationFactory {
 		String url = SnpomicsEngine.getProperty("jdbc.url");
 		String username = SnpomicsEngine.getProperty("jdbc.username");
 		String password = SnpomicsEngine.getProperty("jdbc.password");
+		curGenome = null;
 		try {
 			Connection c;
 			if (username == null)
@@ -124,6 +125,7 @@ public class JdbcFactory extends AnnotationFactory {
 	}
 	
 	public boolean initialize(Connection cxn) {
+		curGenome = null;
 		if (connection != null) {
 			try {
 				connection.close();
@@ -200,6 +202,7 @@ public class JdbcFactory extends AnnotationFactory {
 	@Override
 	public void setGenome(String genome) {
 		this.genome = genome;
+		curGenome = null;
 		loadAnnotationTables();
 	}
 	
@@ -207,24 +210,25 @@ public class JdbcFactory extends AnnotationFactory {
 	public Genome getGenome() {
 		PreparedStatement stat = null;
 		ResultSet rs = null;
-		Genome result = null;
-		try {
-			stat = connection.prepareStatement("SELECT * FROM genomes WHERE id=?");
-			stat.setString(1, genome);
-			rs = stat.executeQuery();
-			if (rs.next()) {
-				result = createGenomeFromRS(rs);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return result;
-		} finally {
+		if (curGenome == null) {
 			try {
-				if (stat != null)
-					stat.close();
-			} catch (SQLException e) {}
+				stat = connection.prepareStatement("SELECT * FROM genomes WHERE id=?");
+				stat.setString(1, genome);
+				rs = stat.executeQuery();
+				if (rs.next()) {
+					curGenome = createGenomeFromRS(rs);
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return curGenome;
+			} finally {
+				try {
+					if (stat != null)
+						stat.close();
+				} catch (SQLException e) {}
+			}
 		}
-		return result;
+		return curGenome;
 	}
 
 	@Override
@@ -448,6 +452,7 @@ public class JdbcFactory extends AnnotationFactory {
 	private Connection connection;
 	private Thread connectionCloser;
 	private String genome;
+	private Genome curGenome;
 	private Map<Class<? extends ReferenceAnnotation>, List<ReferenceMetadata<?>>> versions;
 	private Map<Class<? extends ReferenceAnnotation>, ReferenceMetadata<?>> defaults;
 	private Map<ReferenceMetadata<?>, String> tableNames;

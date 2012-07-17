@@ -46,6 +46,11 @@ public class Genome {
 	public Set<String> getAltTransChromosomes() {
 		return altTransChrom;
 	}
+	public int getTransTableId(String chromosome) {
+		if (altTransChrom.contains(chromosome))
+			return altTransID;
+		return transID;
+	}
 	
 	public void setTransTableId(int id) {
 		transID = id;

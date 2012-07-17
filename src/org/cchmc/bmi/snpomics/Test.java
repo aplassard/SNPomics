@@ -39,13 +39,14 @@ public class Test {
 			g.setTransTableId(1);
 			g.setAltTransTableId(2);
 			g.addAltTransChromosome("MT");
-			factory.createGenome(g);
+			factory.createGenome(g);*/
 			
-			ReferenceMetadata<?> rmd = new ReferenceMetadata<TranscriptAnnotation>(TranscriptAnnotation.class, "GRCh37", "ucsc");
+			factory.setGenome("GRCh37");
+			/*ReferenceMetadata<?> rmd = new ReferenceMetadata<TranscriptAnnotation>(TranscriptAnnotation.class, "GRCh37", "ucscv2");
 			rmd.setSource("http://genome.ucsc.edu/cgi-bin/hgTables");
 			rmd.setUpdateDate(new Date());
-			factory.importData(new FileReader("/Users/dexzb9/Downloads/genes_GRCh37.txt"), rmd);*/
-			factory.setGenome("GRCh37");
+			factory.importData(new FileReader("/Users/dexzb9/Downloads/genes_GRCh37.txt"), rmd);
+			factory.makeVersionPermanentDefault(TranscriptAnnotation.class, rmd.getVersion());*/
 			/*ReferenceMetadata<?> rmd = new ReferenceMetadata<GenomicSequenceAnnotation>(GenomicSequenceAnnotation.class, "GRCh37", "");
 			rmd.setSource("http://www.ncbi.nlm.nih.gov/projects/genome/assembly/grc/human/index.shtml");
 			rmd.setUpdateDate(new Date());
@@ -64,6 +65,7 @@ public class Test {
 			List<OutputField> desiredAnnotations = new ArrayList<OutputField>();
 			desiredAnnotations.add(potentialFields.get("Gene Name"));
 			desiredAnnotations.add(potentialFields.get("cDNA variation"));
+			desiredAnnotations.add(potentialFields.get("Protein change"));
 			
 			long start = System.currentTimeMillis();
 			SnpomicsEngine.run(input, output, factory, desiredAnnotations);

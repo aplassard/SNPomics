@@ -6,13 +6,11 @@ import org.cchmc.bmi.snpomics.SimpleVariant;
 import org.cchmc.bmi.snpomics.Variant;
 import org.cchmc.bmi.snpomics.annotation.annotator.Annotator;
 import org.cchmc.bmi.snpomics.annotation.annotator.DummyAnnotator;
-import org.cchmc.bmi.snpomics.annotation.annotator.HgvsDnaAnnotator;
-import org.cchmc.bmi.snpomics.annotation.annotator.OverlappingAnnotator;
+import org.cchmc.bmi.snpomics.annotation.annotator.TranscriptEffectAnnotator;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.annotation.interactive.DummyAnnotation;
-import org.cchmc.bmi.snpomics.annotation.interactive.HgvsDnaName;
 import org.cchmc.bmi.snpomics.annotation.interactive.InteractiveAnnotation;
-import org.cchmc.bmi.snpomics.annotation.interactive.OverlappingGeneAnnotation;
+import org.cchmc.bmi.snpomics.annotation.interactive.TranscriptEffectAnnotation;
 import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
 
 /**
@@ -31,10 +29,8 @@ public class Annotate {
 	public static Annotator<? extends InteractiveAnnotation> getAnnotator(Class<? extends InteractiveAnnotation> cls, AnnotationFactory factory) {
 		if (cls == DummyAnnotation.class)
 			return new DummyAnnotator();
-		if (cls == OverlappingGeneAnnotation.class)
-			return new OverlappingAnnotator();
-		if (cls == HgvsDnaName.class)
-			return new HgvsDnaAnnotator();
+		if (cls == TranscriptEffectAnnotation.class)
+			return new TranscriptEffectAnnotator();
 		return null;
 	}
 	

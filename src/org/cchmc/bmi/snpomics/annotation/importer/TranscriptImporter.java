@@ -34,6 +34,10 @@ import org.cchmc.bmi.snpomics.util.StringUtils;
  * a gene symbol in it</p>
  * <p>Lines beginning with a # sign are ignored, so you can get tables by using the "selected fields
  * from primary and related tables" export function of the UCSC table browser</p>
+ * <p>Any transcripts which have the gene symbol '<code>abParts</code>' will be <b>skipped</b> (ie, not 
+ * imported).  This is an ugly, hackish, special case, but these are catchall antibody "genes" in the
+ * UCSC model that can be enormous (the largest in humans, on chr14, has 4461 exons.  Compare that to 
+ * titin, which has ~200)</p>
  * @author dexzb9
  *
  */
@@ -51,6 +55,8 @@ public class TranscriptImporter extends JdbcImporter<TranscriptAnnotation> {
 				if (line.charAt(0) == '#')
 					continue;
 				String[] F = line.split("\t");
+				if (F[10].equals("abParts"))
+					continue;
 				GenomicSpan span = new GenomicSpan(F[1], Long.parseLong(F[3])+1, Long.parseLong(F[4]));
 				List<String> exonStarts = new ArrayList<String>();
 				for (String val : F[7].split(",")) {
@@ -98,8 +104,8 @@ public class TranscriptImporter extends JdbcImporter<TranscriptAnnotation> {
 			"txEnd int(10) UNSIGNED NOT NULL, "+
 			"cdsStart int(10) UNSIGNED NOT NULL, "+
 			"cdsEnd int(10) UNSIGNED NOT NULL, "+
-			"exonStarts longblob NOT NULL, "+
-			"exonEnds longblob NOT NULL, "+
+			"exonStarts varbinary(5000) NOT NULL, "+
+			"exonEnds varbinary(5000) NOT NULL, "+
 			"PRIMARY KEY (id), "+
 			"INDEX bin (chrom, bin))";
 	}

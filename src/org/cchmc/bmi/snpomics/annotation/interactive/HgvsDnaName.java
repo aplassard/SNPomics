@@ -1,6 +1,10 @@
 package org.cchmc.bmi.snpomics.annotation.interactive;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
+import org.cchmc.bmi.snpomics.exception.UncheckedSnpomicsException;
 
 /**
  * A description of the variant relative to a gene, following HGVS nomenclature (ie c.76A>C or c.76_77insT).
@@ -8,41 +12,38 @@ import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
  * @author dexzb9
  *
  */
-public class HgvsDnaName implements InteractiveAnnotation {
+public class HgvsDnaName {
 
 	public HgvsDnaName(TranscriptAnnotation tx) {
 		this.tx = tx;
 		name = null;
-		prefix = "c";
+		prefix = tx.isProteinCoding() ? "c" : "n";
 		endCoord = null;
-		reference = null;
 		startCoord = null;
 		ref = null;
 		alt = null;
 	}
 	
-	@Abbreviation("cdna")
-	@ShortName("cDNA variation")
-	@Description("HGVS nomenclature for cDNA-level changes")
 	public String getName() {
 		if (name == null)
 			buildName();
 		return name;
 	}
 	
-	@Abbreviation("GENE")
-	@ShortName("Gene Name")
-	@Description("Name of overlapping gene(s)")
-	public String getGeneName() {
-		return tx.getName();
-	}
-
-	public void setReference(String reference) {
-		this.reference = reference;
+	public boolean isCoding() {
+		return tx.isProteinCoding() && 
+			(isCoordinateCoding(startCoord) || (endCoord != null && isCoordinateCoding(endCoord)));
 	}
 	
-	public void setProteinCoding(boolean isCoding) {
-		prefix = isCoding ? "c" : "n";
+	public int getNearestCodingNtToStart() {
+		return getNearestCodingNt(startCoord);
+	}
+	
+	public int getNearestCodingNtToEnd() {
+		if (endCoord == null)
+			return getNearestCodingNtToStart();
+		else
+			return getNearestCodingNt(endCoord);
 	}
 	
 	public void setStartCoordinate(String coord) {
@@ -63,8 +64,7 @@ public class HgvsDnaName implements InteractiveAnnotation {
 
 	private void buildName() {
 		StringBuilder sb = new StringBuilder();
-		if (reference != null)
-			sb.append(reference+":");
+		sb.append(tx.getID()+":");
 		sb.append(prefix+".");
 		sb.append(startCoord);
 		if (endCoord != null && !endCoord.equals(startCoord))
@@ -95,12 +95,36 @@ public class HgvsDnaName implements InteractiveAnnotation {
 		name = sb.toString();
 	}
 	
+	private boolean isCoordinateCoding(String coord) {
+		return codingPattern.matcher(coord).matches();
+	}
+	
+	private int getNearestCodingNt(String coord) {
+		Matcher m = coordinatePattern.matcher(coord);
+		if (!m.matches())
+			throw new UncheckedSnpomicsException("Coordinate \""+coord+"\" does not match expected pattern");
+		String utrSpec = m.group(1);
+		//If not in a UTR, then the nearest nt is already spec'd in the coordinate
+		if (utrSpec.isEmpty())
+			return Integer.parseInt(m.group(2));
+		else if (utrSpec.equals("-"))
+			return 1;
+		else
+			return tx.getCdsLength();
+	}
+	
+	static {
+		codingPattern = Pattern.compile("^[0-9]+$");
+		coordinatePattern = Pattern.compile("^([-*]?)([0-9]+)([-+][0-9]+)?$");
+	}
+	
 	private TranscriptAnnotation tx;
 	private String name;
-	private String reference;
 	private String prefix;
 	private String startCoord;
 	private String endCoord;
 	private String ref;
 	private String alt;
+	private static Pattern codingPattern;
+	private static Pattern coordinatePattern;
 }
