@@ -158,6 +158,10 @@ public class HgvsProtName {
 					refAllele.clear();
 					refAllele.add(ref.get(leftFlank));
 				}
+				if (altAllele.size() > 1) {
+					altAllele.clear();
+					altAllele.add(alt.get(leftFlank));
+				}
 			} else if (!refAllele.isEmpty() && refAllele.get(0) == AminoAcid.MET && startCoord+leftFlank == 1) {
 				//start-loss
 				altAllele.clear();
