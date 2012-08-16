@@ -95,6 +95,10 @@ public class VCFReader implements GenotypeIterator {
 		result.setPosition(position);
 		result.setRef(fields[3]);
 		result.setAlt(Arrays.asList(fields[4].split(",")));
+		if (fields[2] != ".")
+			result.setId(fields[2]);
+		if (fields[5] != ".")
+			result.setQualString(fields[5]);
 		return result;
 	}
 	
@@ -155,16 +159,8 @@ public class VCFReader implements GenotypeIterator {
 		return headers;
 	}
 	
-	public String getID() {
-		return fields[2];
-	}
-	
 	public String getFilter() {
 		return fields[6];
-	}
-	
-	public String getQualString() {
-		return fields[5];
 	}
 
 	private boolean isInitialized;

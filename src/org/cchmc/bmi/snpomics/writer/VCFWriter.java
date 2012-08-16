@@ -36,9 +36,7 @@ public class VCFWriter implements VariantWriter {
 		String getHeaderLine();
 		String getGenotypes();
 		boolean hasGenotypes();
-		String getID();
 		String getFilter();
-		String getQualString();
 		static final String headerLine = "#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO";
 	}
 	
@@ -77,16 +75,8 @@ public class VCFWriter implements VariantWriter {
 			return vcf.hasGenotypes();
 		}
 		@Override
-		public String getID() {
-			return vcf.getID();
-		}
-		@Override
 		public String getFilter() {
 			return vcf.getFilter();
-		}
-		@Override
-		public String getQualString() {
-			return vcf.getQualString();
 		}
 		private VCFReader vcf;
 	}
@@ -103,16 +93,8 @@ public class VCFWriter implements VariantWriter {
 			return new HashMap<String,String>();
 		}
 		@Override
-		public String getID() {
-			return ".";
-		}
-		@Override
 		public String getFilter() {
 			return "PASS";
-		}
-		@Override
-		public String getQualString() {
-			return ".";
 		}
 	}
 	
@@ -245,10 +227,10 @@ public class VCFWriter implements VariantWriter {
 		ArrayList<String> fields = new ArrayList<String>();
 		fields.add(annotatedVariant.getPosition().getChromosome());
 		fields.add(Long.toString(annotatedVariant.getPosition().getStart()));
-		fields.add(helper.getID());
+		fields.add(annotatedVariant.getId() == null ? "." : annotatedVariant.getId());
 		fields.add(annotatedVariant.getRef());
 		fields.add(StringUtils.join(",", annotatedVariant.getAlt()));
-		fields.add(helper.getQualString());
+		fields.add(annotatedVariant.getQualString() == null ? "." : annotatedVariant.getQualString());
 		fields.add(helper.getFilter());
 		
 		ArrayList<String> infoStr = new ArrayList<String>();

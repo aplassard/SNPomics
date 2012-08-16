@@ -22,9 +22,43 @@ public class Variant {
 	private String ref;
 	private List<String> alt;
 	private Map<Class<? extends InteractiveAnnotation>, List<List<? extends InteractiveAnnotation>>> annot;
+	private String id;
+	private String qual;
 	
+	/**
+	 * External (ie, dbSNP) id.  Non-unique.  Null if unknown or none
+	 */
+	public String getId() {
+		return id;
+	}
+
+	/**
+	 * External (ie, dbSNP) id.  Non-unique
+	 * @param id
+	 */
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	/**
+	 * Phred-scaled "quality", represented as a String.  Null if unknown or none
+	 */
+	public String getQualString() {
+		return qual;
+	}
+
+	/**
+	 * Phred-scaled "quality", represented as a String
+	 * @param qual
+	 */
+	public void setQualString(String qual) {
+		this.qual = qual;
+	}
+
 	public Variant() {
 		annot = new HashMap<Class<? extends InteractiveAnnotation>, List<List<? extends InteractiveAnnotation>>>();
+		id = null;
+		qual = null;
 	}
 	
 	public GenomicSpan getPosition() {
