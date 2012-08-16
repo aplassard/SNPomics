@@ -240,7 +240,7 @@ public class VCFWriter implements VariantWriter {
 			else
 				infoStr.add(key + "=" + info.get(key));
 		}
-		fields.add(StringUtils.join(";", infoStr));
+		fields.add(infoStr.isEmpty() ? "." : StringUtils.join(";", infoStr));
 		
 		if (helper.hasGenotypes())
 			fields.add(helper.getGenotypes());
