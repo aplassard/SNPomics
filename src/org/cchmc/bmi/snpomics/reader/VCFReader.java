@@ -4,9 +4,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.cchmc.bmi.snpomics.AnnotatedGenotype;
 import org.cchmc.bmi.snpomics.GenomicSpan;
 import org.cchmc.bmi.snpomics.Variant;
+import org.cchmc.bmi.snpomics.util.StringUtils;
 
 public class VCFReader implements GenotypeIterator {
 	
@@ -28,6 +34,7 @@ public class VCFReader implements GenotypeIterator {
 		if (isInitialized)
 			return;
 		headers = new ArrayList<String>();
+		samples = null;
 		isInitialized = true;
 		try {
 			String line;
@@ -38,7 +45,11 @@ public class VCFReader implements GenotypeIterator {
 					continue;
 				}
 				if (line.startsWith("#")) {
-					headers.add(line);
+					String[] f = line.trim().split("\t");
+					if (f.length > 8)
+						samples = new ArrayList<String>(Arrays.asList(f).subList(9, f.length));
+					else
+						samples = Collections.emptyList();
 					return;
 				}
 			}
@@ -46,6 +57,16 @@ public class VCFReader implements GenotypeIterator {
 			System.err.println(e.getMessage());
 		}
 
+	}
+	
+	@Override
+	public List<String> getSamples() {
+		return samples;
+	}
+	
+	@Override
+	public boolean hasGenotypes() {
+		return samples.size() > 0;
 	}
 
 	@Override
@@ -76,9 +97,79 @@ public class VCFReader implements GenotypeIterator {
 		result.setAlt(Arrays.asList(fields[4].split(",")));
 		return result;
 	}
+	
+	@Override
+	public List<AnnotatedGenotype> getGenotypes() {
+		if (!hasGenotypes())
+			return Collections.emptyList();
+		ArrayList<AnnotatedGenotype> gt = new ArrayList<AnnotatedGenotype>();
+		String[] format = fields[8].split(":");
+		for (int i=9;i<fields.length;i++) {
+			AnnotatedGenotype geno = new AnnotatedGenotype();
+			String[] val = fields[i].split(":");
+			if (!val[0].startsWith(".")) {
+				ArrayList<Integer> alleles = new ArrayList<Integer>();
+				for (String code : val[0].split("/|\\|"))
+					alleles.add(Integer.parseInt(code));
+				geno.setAlleles(alleles);
+				for (int j=1;j<val.length;j++)
+					geno.setValue(format[j], val[j]);
+			}
+			gt.add(geno);
+		}
+		return gt;
+	}
+	
+	/**
+	 * Returns all of the Format/Genotype columns from the VCF as a single string.
+	 * This method performs ZERO parsing/validation, and is really only useful for passing
+	 * information untouched to a VCFWriter
+	 * @return
+	 */
+	public String getRawGenotypesAndFormat() {
+		if (hasGenotypes())
+			return StringUtils.join("\t", Arrays.asList(fields).subList(8, fields.length));
+		return "";
+	}
+	
+	/**
+	 * Parses the INFO column of the current line into a Map&lt;String, String>.  Flag fields
+	 * will be present in the Map, but will have null for a value
+	 * @return
+	 */
+	public Map<String, String> getInfo() {
+		HashMap<String, String> result = new HashMap<String, String>();
+		for (String info : fields[7].split(";")) {
+			String[] f = info.split("=");
+			result.put(f[0], f.length > 1 ? f[1] : null);
+		}
+		return result;
+	}
+	
+	/**
+	 * Returns the "meta-information lines" from the VCF.  Does not include the header line,
+	 * ie the one that starts with "#CHROM"
+	 * @return
+	 */
+	public List<String> getMetaInformation() {
+		return headers;
+	}
+	
+	public String getID() {
+		return fields[2];
+	}
+	
+	public String getFilter() {
+		return fields[6];
+	}
+	
+	public String getQualString() {
+		return fields[5];
+	}
 
 	private boolean isInitialized;
 	private BufferedReader in;
 	private ArrayList<String> headers;
+	private List<String> samples;
 	private String[] fields;
 }

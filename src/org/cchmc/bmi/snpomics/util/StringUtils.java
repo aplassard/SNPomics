@@ -4,10 +4,10 @@ import java.util.Collection;
 
 public class StringUtils {
 
-	public static String join(String delim, Collection<String> fields) {
+	public static String join(String delim, Collection<?> fields) {
 		StringBuilder sb = new StringBuilder();
-		for (String s : fields) {
-			sb.append(s);
+		for (Object s : fields) {
+			sb.append(s.toString());
 			sb.append(delim);
 		}
 		//Remove the trailing delimiter

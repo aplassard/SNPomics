@@ -14,7 +14,7 @@ import org.cchmc.bmi.snpomics.annotation.loader.GenomicSequenceLoader;
 import org.cchmc.bmi.snpomics.annotation.reference.GenomicSequenceAnnotation;
 import org.cchmc.bmi.snpomics.reader.InputIterator;
 import org.cchmc.bmi.snpomics.reader.VCFReader;
-import org.cchmc.bmi.snpomics.writer.TsvWriter;
+import org.cchmc.bmi.snpomics.writer.VCFWriter;
 import org.cchmc.bmi.snpomics.writer.VariantWriter;
 
 public class Test {
@@ -57,7 +57,7 @@ public class Test {
 			getSequence(loader, "2:1456623");*/
 
 			InputIterator input = new VCFReader(new BufferedReader(new FileReader(args[0])));
-			VariantWriter output = new TsvWriter(new PrintWriter(new FileWriter(args[1])));
+			VariantWriter output = new VCFWriter(new PrintWriter(new FileWriter(args[1])));
 			//VariantWriter output = new TsvWriter(new PrintWriter(System.out));
 			
 			Map<String, OutputField> potentialFields = SnpomicsEngine.getAllowedOutput();
