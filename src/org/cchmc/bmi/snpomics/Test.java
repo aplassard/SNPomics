@@ -56,8 +56,10 @@ public class Test {
 			getSequence(loader, "11:1456623-1456780");
 			getSequence(loader, "2:1456623");*/
 
-			InputIterator input = new VCFReader(new BufferedReader(new FileReader(args[0])));
-			VariantWriter output = new VCFWriter(new PrintWriter(new FileWriter(args[1])));
+			InputIterator input = new VCFReader();
+			input.setInput(new BufferedReader(new FileReader(args[0])));
+			VariantWriter output = new VCFWriter();
+			output.setOutput(new PrintWriter(new FileWriter(args[1])));
 			//VariantWriter output = new TsvWriter(new PrintWriter(System.out));
 			
 			Map<String, OutputField> potentialFields = SnpomicsEngine.getAllowedOutput();

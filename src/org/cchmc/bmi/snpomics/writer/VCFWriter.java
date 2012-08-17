@@ -3,9 +3,11 @@ package org.cchmc.bmi.snpomics.writer;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.cchmc.bmi.snpomics.Genotype;
@@ -155,7 +157,11 @@ public class VCFWriter implements VariantWriter {
 		}
 	}
 	
-	public VCFWriter(PrintWriter writer) {
+	public VCFWriter() {
+	}
+	
+	@Override
+	public void setOutput(PrintWriter writer) {
 		output = writer;
 	}
 
@@ -251,6 +257,26 @@ public class VCFWriter implements VariantWriter {
 	@Override
 	public void close() {
 		output.close();
+	}
+
+	@Override
+	public String name() {
+		return "vcf";
+	}
+
+	@Override
+	public String description() {
+		return "Variant Context Format (VCF), with genotypes if available";
+	}
+
+	@Override
+	public String preferredExtension() {
+		return "vcf";
+	}
+
+	@Override
+	public Set<String> allowedExtensions() {
+		return Collections.emptySet();
 	}
 
 	private PrintWriter output;

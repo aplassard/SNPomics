@@ -1,5 +1,6 @@
 package org.cchmc.bmi.snpomics;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -94,6 +95,142 @@ public class SnpomicsEngine {
 		return result;
 	}
 	
+	public static Map<String, Class<? extends InputIterator>> getReaders() {
+		Map<String, Class<? extends InputIterator>> result = new HashMap<String, Class<? extends InputIterator>>();
+		Reflections reflections = new Reflections("org.cchmc.bmi.snpomics.reader");
+		for (Class<? extends InputIterator> cls : reflections.getSubTypesOf(InputIterator.class)) {
+			if (!cls.isInterface()) {
+				try {
+					String name = cls.newInstance().name();
+					Class<?> oldVal = result.put(name, cls);
+					if (oldVal != null)
+						throw new RuntimeException("Duplicate InputIterator names: "+oldVal.getCanonicalName()+
+								" and "+cls.getCanonicalName());
+				} catch (InstantiationException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return result;
+	}
+	
+	public static InputIterator getBestInputIteratorForFile(File toRead) {
+		InputIterator result = null;
+		String filename = toRead.getName();
+		int extStart = filename.lastIndexOf('.');
+		//If there's no extension, we can't guess
+		if (extStart < 0)
+			return null;
+		String extension = filename.substring(extStart+1).toLowerCase();
+		boolean isPreferredProvider = false;
+		boolean multipleSecondaries = false;
+		Reflections reflections = new Reflections("org.cchmc.bmi.snpomics.reader");
+		for (Class<? extends InputIterator> cls : reflections.getSubTypesOf(InputIterator.class)) {
+			if (!cls.isInterface()) {
+				try {
+					InputIterator interim = cls.newInstance();
+					if (interim.preferredExtension().equals(extension)) {
+						if (result == null || !isPreferredProvider) {
+							result = interim;
+							isPreferredProvider = true;
+							multipleSecondaries = false;
+						} else {
+							//Multiple InputIterators list this extension as preferred!  Can't choose!
+							return null;
+						}
+					}
+					//Only need to check the secondaries if we haven't found a primary
+					if (!isPreferredProvider && interim.allowedExtensions().contains(extension)) {
+						//If we've found multiple secondaries, note that.  If we don't eventually
+						//see a primary, we won't be able to choose
+						if (result == null)
+							result = interim;
+						else
+							multipleSecondaries = true;
+					}
+				} catch (InstantiationException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		//If something is stored in result, make sure it's not one of several equals
+		if (multipleSecondaries)
+			return null;
+		return result;
+	}
+
+	public static Map<String, Class<? extends VariantWriter>> getWriters() {
+		Map<String, Class<? extends VariantWriter>> result = new HashMap<String, Class<? extends VariantWriter>>();
+		Reflections reflections = new Reflections("org.cchmc.bmi.snpomics.writer");
+		for (Class<? extends VariantWriter> cls : reflections.getSubTypesOf(VariantWriter.class)) {
+			if (!cls.isInterface()) {
+				try {
+					String name = cls.newInstance().name();
+					Class<?> oldVal = result.put(name, cls);
+					if (oldVal != null)
+						throw new RuntimeException("Duplicate VariantWriter names: "+oldVal.getCanonicalName()+
+								" and "+cls.getCanonicalName());
+				} catch (InstantiationException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return result;
+	}
+	
+	public static VariantWriter getBestVariantWriterForFile(File toWrite) {
+		VariantWriter result = null;
+		String filename = toWrite.getName();
+		int extStart = filename.lastIndexOf('.');
+		//If there's no extension, we can't guess
+		if (extStart < 0)
+			return null;
+		String extension = filename.substring(extStart+1).toLowerCase();
+		boolean isPreferredProvider = false;
+		boolean multipleSecondaries = false;
+		Reflections reflections = new Reflections("org.cchmc.bmi.snpomics.writer");
+		for (Class<? extends VariantWriter> cls : reflections.getSubTypesOf(VariantWriter.class)) {
+			if (!cls.isInterface()) {
+				try {
+					VariantWriter interim = cls.newInstance();
+					if (interim.preferredExtension().equals(extension)) {
+						if (result == null || !isPreferredProvider) {
+							result = interim;
+							isPreferredProvider = true;
+							multipleSecondaries = false;
+						} else {
+							//Multiple VariantWriters list this extension as preferred!  Can't choose!
+							return null;
+						}
+					}
+					//Only need to check the secondaries if we haven't found a primary
+					if (!isPreferredProvider && interim.allowedExtensions().contains(extension)) {
+						//If we've found multiple secondaries, note that.  If we don't eventually
+						//see a primary, we won't be able to choose
+						if (result == null)
+							result = interim;
+						else
+							multipleSecondaries = true;
+					}
+				} catch (InstantiationException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		//If something is stored in result, make sure it's not one of several equals
+		if (multipleSecondaries)
+			return null;
+		return result;
+	}
+
 	public static String getProperty(String key) {
 		return prop.getProperty(key);
 	}

@@ -3,7 +3,9 @@ package org.cchmc.bmi.snpomics.writer;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.cchmc.bmi.snpomics.OutputField;
 import org.cchmc.bmi.snpomics.Variant;
@@ -13,13 +15,16 @@ import org.cchmc.bmi.snpomics.util.StringUtils;
 
 public class TsvWriter implements VariantWriter {
 
-	public TsvWriter(PrintWriter writer) {
-		output = writer;
+	public TsvWriter() {
 		delim = "\t";
 	}
 	
-	public TsvWriter(PrintWriter writer, String delimiter) {
+	@Override
+	public void setOutput(PrintWriter writer) {
 		output = writer;
+	}
+	
+	public void setDelimiter(String delimiter) {
 		delim = delimiter;
 	}
 	
@@ -86,5 +91,27 @@ public class TsvWriter implements VariantWriter {
 	@Override
 	public void close() {
 		output.close();
+	}
+
+	@Override
+	public String name() {
+		return "tsv";
+	}
+
+	@Override
+	public String description() {
+		return "Writes variants only to a tab-separated file";
+	}
+
+	@Override
+	public String preferredExtension() {
+		return "txt";
+	}
+
+	@Override
+	public Set<String> allowedExtensions() {
+		Set<String> result = new HashSet<String>();
+		result.add("tsv");
+		return result;
 	}
 }

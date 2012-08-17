@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.cchmc.bmi.snpomics.AnnotatedGenotype;
 import org.cchmc.bmi.snpomics.GenomicSpan;
@@ -20,10 +21,7 @@ public class VCFReader implements GenotypeIterator {
 		isInitialized = false;
 	}
 	
-	public VCFReader(BufferedReader input) {
-		setInput(input);
-	}
-	
+	@Override
 	public void setInput(BufferedReader input) {
 		isInitialized = false;
 		in = input;
@@ -161,6 +159,26 @@ public class VCFReader implements GenotypeIterator {
 	
 	public String getFilter() {
 		return fields[6];
+	}
+
+	@Override
+	public String name() {
+		return "vcf";
+	}
+
+	@Override
+	public String description() {
+		return "Variant Context Format (VCF) files, either with or without genotypes";
+	}
+
+	@Override
+	public String preferredExtension() {
+		return "vcf";
+	}
+
+	@Override
+	public Set<String> allowedExtensions() {
+		return Collections.emptySet();
 	}
 
 	private boolean isInitialized;
