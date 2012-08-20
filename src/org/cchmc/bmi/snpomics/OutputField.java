@@ -2,37 +2,35 @@ package org.cchmc.bmi.snpomics;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 
-import org.cchmc.bmi.snpomics.annotation.interactive.Abbreviation;
-import org.cchmc.bmi.snpomics.annotation.interactive.Description;
 import org.cchmc.bmi.snpomics.annotation.interactive.InteractiveAnnotation;
-import org.cchmc.bmi.snpomics.annotation.interactive.ShortName;
+import org.cchmc.bmi.snpomics.annotation.interactive.MetaAnnotation;
+import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
 
 public class OutputField {
 
 	public OutputField(Method source) {
 		method = source;
+		annotation = method.getAnnotation(MetaAnnotation.class);
+		//TODO: Throw an exception if annotation is null
 	}
 	
-	public String getAbbreviation() {
-		Abbreviation abbrev = method.getAnnotation(Abbreviation.class);
-		if (abbrev == null)
-			return "N/A";
-		return abbrev.value();
-	}
-	
-	public String getShortName() {
-		ShortName name = method.getAnnotation(ShortName.class);
-		if (name == null)
-			return "None";
-		return name.value();
+	public String getName() {
+		return annotation.name();
 	}
 	
 	public String getDescription() {
-		Description desc = method.getAnnotation(Description.class);
-		if (desc == null)
-			return "No description";
-		return desc.value();
+		return annotation.description();
+	}
+	
+	public List<String> getGroups() {
+		return Arrays.asList(annotation.groups());
+	}
+	
+	public List<Class<? extends ReferenceAnnotation>> getReferences() {
+		return Arrays.asList(annotation.ref());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -49,8 +47,9 @@ public class OutputField {
 	}
 	
 	public static boolean isOutputField(Method toCheck) {
-		return toCheck.isAnnotationPresent(ShortName.class);
+		return toCheck.isAnnotationPresent(MetaAnnotation.class);
 	}
 	
 	private Method method;
+	private MetaAnnotation annotation;
 }

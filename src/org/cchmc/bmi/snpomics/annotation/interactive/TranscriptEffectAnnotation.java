@@ -2,6 +2,7 @@ package org.cchmc.bmi.snpomics.annotation.interactive;
 
 import java.util.List;
 
+import org.cchmc.bmi.snpomics.annotation.reference.GenomicSequenceAnnotation;
 import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
 import org.cchmc.bmi.snpomics.translation.AminoAcid;
 
@@ -18,37 +19,32 @@ public class TranscriptEffectAnnotation implements InteractiveAnnotation {
 		protName = new HgvsProtName(tx);
 	}
 	
-	@Abbreviation("GENE")
-	@ShortName("Gene Name")
-	@Description("Name of overlapping gene(s)")
+	@MetaAnnotation(name="Gene", description="Name of overlapping gene(s)",
+			ref={TranscriptAnnotation.class, GenomicSequenceAnnotation.class})
 	public String getGeneName() {
 		return tx.getName();
 	}
 	
-	@Abbreviation("TX")
-	@ShortName("Transcript Name")
-	@Description("Name of overlapping transcript(s)")
+	@MetaAnnotation(name="Transcript", description="Name of overlapping transcript(s)",
+			ref={TranscriptAnnotation.class, GenomicSequenceAnnotation.class})
 	public String getTranscriptName() {
 		return tx.getID();
 	}
 
-	@Abbreviation("PROT")
-	@ShortName("Protein Name")
-	@Description("Name of overlapping protein(s)")
+	@MetaAnnotation(name="Protein", description="Name of overlapping protein(s)",
+			ref={TranscriptAnnotation.class, GenomicSequenceAnnotation.class})
 	public String getProtName() {
 		return tx.getProtID();
 	}
 
-	@Abbreviation("cdna")
-	@ShortName("cDNA variation")
-	@Description("HGVS nomenclature for cDNA-level changes")
+	@MetaAnnotation(name="CdnaVariation", description="HGVS nomenclature for cDNA-level changes",
+			ref={TranscriptAnnotation.class, GenomicSequenceAnnotation.class})
 	public String getHgvsCdnaName() {
 		return dnaName.getName();
 	}
 
-	@Abbreviation("ProtVar")
-	@ShortName("Protein change")
-	@Description("HGVS nomenclature for protein-level changes")
+	@MetaAnnotation(name="ProteinVariation", description="HGVS nomenclature for protein-level changes",
+			ref={TranscriptAnnotation.class, GenomicSequenceAnnotation.class})
 	public String getHgvsProteinName() {
 		return protName.getName();
 	}

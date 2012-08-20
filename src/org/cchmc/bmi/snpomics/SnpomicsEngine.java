@@ -68,11 +68,11 @@ public class SnpomicsEngine {
 			for (Method meth : cls.getMethods()) {
 				if (OutputField.isOutputField(meth)) {
 					OutputField field = new OutputField(meth);
-					if (result.containsKey(field.getShortName())) {
-						throw new RuntimeException("Duplicate ShortNames: "+meth.getName()+" and "+
-								result.get(field.getShortName()).getInternalName());
+					if (result.containsKey(field.getName())) {
+						throw new RuntimeException("Duplicate Names: "+meth.getName()+" and "+
+								result.get(field.getName()).getInternalName());
 					}
-					result.put(field.getShortName(), field);
+					result.put(field.getName(), field);
 				}
 			}
 		}

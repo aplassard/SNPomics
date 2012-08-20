@@ -188,7 +188,7 @@ public class VCFWriter implements VariantWriter {
 		for (OutputField f : annotationList) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("##INFO=<ID=");
-			sb.append(f.getAbbreviation());
+			sb.append(f.getName());
 			sb.append(",Number=.,Type=String,Description=\"");
 			sb.append(f.getDescription());
 			sb.append("\">");
@@ -220,7 +220,7 @@ public class VCFWriter implements VariantWriter {
 				}
 				String value = StringUtils.join(",", annot);
 				if (nonEmptyAnnotation.matcher(value).find())
-					info.put(field.getAbbreviation(), value);
+					info.put(field.getName(), value);
 			}
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();

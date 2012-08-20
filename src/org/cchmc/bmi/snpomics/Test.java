@@ -65,9 +65,9 @@ public class Test {
 			Map<String, OutputField> potentialFields = SnpomicsEngine.getAllowedOutput();
 			
 			List<OutputField> desiredAnnotations = new ArrayList<OutputField>();
-			desiredAnnotations.add(potentialFields.get("Gene Name"));
-			desiredAnnotations.add(potentialFields.get("cDNA variation"));
-			desiredAnnotations.add(potentialFields.get("Protein change"));
+			desiredAnnotations.add(potentialFields.get("Gene"));
+			desiredAnnotations.add(potentialFields.get("CdnaVariation"));
+			desiredAnnotations.add(potentialFields.get("ProteinVariation"));
 			
 			long start = System.currentTimeMillis();
 			SnpomicsEngine.run(input, output, factory, desiredAnnotations);

@@ -43,7 +43,7 @@ public class TsvWriter implements VariantWriter {
 		
 		annotationList = fields;
 		for (OutputField f : fields)
-			columns.add(f.getShortName());
+			columns.add(f.getName());
 		
 		output.println(StringUtils.join(delim, columns));
 	}
