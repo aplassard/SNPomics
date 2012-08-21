@@ -1,6 +1,7 @@
 package org.cchmc.bmi.snpomics.cli.arguments;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
 import com.beust.jcommander.Parameter;
@@ -22,5 +23,5 @@ public class AnnotateArguments {
 	public String outputType;
 
 	@Parameter(names={"-f", "--fields"}, description="Annotation fields to include in output")
-	public List<String> fields;
+	public List<String> fields = Collections.emptyList();
 }

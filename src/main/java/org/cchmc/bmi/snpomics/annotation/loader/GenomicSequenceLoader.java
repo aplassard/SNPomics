@@ -30,6 +30,7 @@ public class GenomicSequenceLoader extends
 				File fasta = new File(Genome.getReferenceDirectory(), rs.getString(1));
 				reader = new FastaReader(fasta);
 			}
+			isInitialized = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {

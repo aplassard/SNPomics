@@ -54,13 +54,17 @@ public class JdbcFactory extends AnnotationFactory {
 		JdbcLoader<?> loader = null;
 		@SuppressWarnings("rawtypes")
 		ReferenceMetadata<?> rmd = new ReferenceMetadata(cls, genome, version);
-		if (cls == TranscriptAnnotation.class)
-			loader = new TranscriptLoader();
-		if (cls == GenomicSequenceAnnotation.class)
-			loader = new GenomicSequenceLoader();
-		if (loader == null)
-			throw new AnnotationNotFoundException(cls.getCanonicalName());
-		loader.setConnection(connection);
+		if (!loaderCache.containsKey(cls)) {
+			if (cls == TranscriptAnnotation.class)
+				loader = new TranscriptLoader();
+			if (cls == GenomicSequenceAnnotation.class)
+				loader = new GenomicSequenceLoader();
+			if (loader == null)
+				throw new AnnotationNotFoundException(cls.getCanonicalName());
+			loader.setConnection(connection);
+			loaderCache.put(cls, loader);
+		}
+		loader = loaderCache.get(cls);
 		loader.setTableName(tableNames.get(rmd));
 		return (JdbcLoader<T>) loader;
 	}
@@ -83,6 +87,7 @@ public class JdbcFactory extends AnnotationFactory {
 		versions = new HashMap<Class<? extends ReferenceAnnotation>, List<ReferenceMetadata<?>>>();
 		defaults = new HashMap<Class<? extends ReferenceAnnotation>, ReferenceMetadata<?>>();
 		tableNames = new HashMap<ReferenceMetadata<?>, String>();
+		loaderCache = new HashMap<Class<? extends ReferenceAnnotation>, JdbcLoader<?>>();
 		initialize();
 	}
 	
@@ -96,6 +101,7 @@ public class JdbcFactory extends AnnotationFactory {
 		versions = new HashMap<Class<? extends ReferenceAnnotation>, List<ReferenceMetadata<?>>>();
 		defaults = new HashMap<Class<? extends ReferenceAnnotation>, ReferenceMetadata<?>>();
 		tableNames = new HashMap<ReferenceMetadata<?>, String>();
+		loaderCache = new HashMap<Class<? extends ReferenceAnnotation>, JdbcLoader<?>>();
 		initialize(cxn);
 	}
 	
@@ -456,4 +462,5 @@ public class JdbcFactory extends AnnotationFactory {
 	private Map<Class<? extends ReferenceAnnotation>, List<ReferenceMetadata<?>>> versions;
 	private Map<Class<? extends ReferenceAnnotation>, ReferenceMetadata<?>> defaults;
 	private Map<ReferenceMetadata<?>, String> tableNames;
+	private Map<Class<? extends ReferenceAnnotation>, JdbcLoader<?>> loaderCache;
 }
