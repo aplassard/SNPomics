@@ -1,0 +1,14 @@
+We've migrated to the Maven build system for two major reasons:
+  1) It simplifies dependencies tremendously - no more storing jars in Git
+  2) It simplifies the build-test-deploy lifecycle, and creates a jar-with-dependencies with one command
+
+Even with these changes, it's still quite simple to develop in Eclipse.  Follow these steps to set up development:
+  1) Install Maven (http://maven.apache.org/index.html).  This mainly involves setting a couple of environment variables
+  2) From the SNPomics directory, run 'mvn compile'.  This will download all the dependencies needed for compilation
+  3) Run 'mvn eclipse:eclipse' to generate the Eclipse .project and .classpath files
+  4) In Eclipse, add the M2_REPO variable to the buildpath (Preferences/Java/Build Path/Classpath Variables).  It should be the path to your Maven repository (~/.m2/repository)
+  5) Either close/reopen your existing project, or Import an Existing Project
+
+More JDBC libs can be added to the dependencies section of pom.xml, they should have a scope of 'runtime'
+
+To generate the final single jar file, run 'mvn package'
