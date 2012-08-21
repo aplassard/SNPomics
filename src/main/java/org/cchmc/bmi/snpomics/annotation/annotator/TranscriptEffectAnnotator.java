@@ -119,7 +119,7 @@ public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnno
 				pos = tx.length() - pos + 1;
 			pos -= tx.get5UtrLength();
 			//There is no position 0 - it transitions from -1 to 1
-			if (pos < 0) pos -= 1;
+			if (pos < 1) pos -= 1;
 			if (pos > tx.getCdsLength()) {
 				pos -= tx.getCdsLength();
 				return "*"+pos;

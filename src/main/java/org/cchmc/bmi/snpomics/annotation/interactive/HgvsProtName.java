@@ -193,8 +193,12 @@ public class HgvsProtName {
 					//Special case: Insertions before the initial Met are not real
 					name = "";
 					return;
-				} else if (isPotentialDuplicate && 
+				} else if (isPotentialDuplicate && (leftFlank >= altAllele.size()) &&
 						ref.subList(leftFlank-altAllele.size(), leftFlank).equals(altAllele)) {
+					//BUG: If the transcript is on the negative strand and the insertion
+					//is 2 or more AAs, than leftFlank < altAllele.size() (since the indel
+					//is left-aligned), and we'll drop an Unk here.
+					//eg: 3	52027853	rs58093471	T	TCCTTGG	494.69	PASS	.
 					int dupLen = altAllele.size();
 					if (leftFlank <= dupLen)
 						sb.append("Unk");
