@@ -8,14 +8,13 @@ import org.cchmc.bmi.snpomics.SimpleVariant;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.annotation.interactive.HgvsDnaName;
 import org.cchmc.bmi.snpomics.annotation.interactive.TranscriptEffectAnnotation;
-import org.cchmc.bmi.snpomics.annotation.loader.GenomicSequenceLoader;
 import org.cchmc.bmi.snpomics.annotation.loader.TranscriptLoader;
-import org.cchmc.bmi.snpomics.annotation.reference.GenomicSequenceAnnotation;
 import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
 import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
 import org.cchmc.bmi.snpomics.translation.AminoAcid;
 import org.cchmc.bmi.snpomics.translation.GeneticCode;
 import org.cchmc.bmi.snpomics.util.BaseUtils;
+import org.cchmc.bmi.snpomics.util.FastaReader;
 
 public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnnotation> {
 
@@ -23,7 +22,8 @@ public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnno
 	public List<TranscriptEffectAnnotation> annotate(SimpleVariant variant,
 			AnnotationFactory factory) throws AnnotationNotFoundException {
 		TranscriptLoader loader = (TranscriptLoader) factory.getLoader(TranscriptAnnotation.class);
-		GenomicSequenceLoader seqLoader = (GenomicSequenceLoader) factory.getLoader(GenomicSequenceAnnotation.class);
+		FastaReader seqLoader = factory.getFasta();
+		//TODO: throw exception if seqLoader is null
 		GeneticCode code = GeneticCode.getTable(factory.getGenome().getTransTableId(variant.getPosition().getChromosome()));
 		List<TranscriptEffectAnnotation> result = new ArrayList<TranscriptEffectAnnotation>();
 		for (TranscriptAnnotation tx : loader.loadByOverlappingPosition(variant.getPosition())) {
@@ -165,13 +165,12 @@ public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnno
 	 * @param tx
 	 * @return
 	 */
-	private String getCDS(GenomicSequenceLoader loader, TranscriptAnnotation tx) {
+	private String getCDS(FastaReader fasta, TranscriptAnnotation tx) {
 		StringBuilder sb = new StringBuilder();
 		GenomicSpan cds = tx.getCds();
 		for (GenomicSpan x : tx.getExons()) {
 			if (cds.overlaps(x)) {
-				List<GenomicSequenceAnnotation> gsa = loader.loadByExactPosition(cds.intersect(x));
-				sb.append(gsa.get(0).getSequence());
+				sb.append(fasta.getSequence(cds.intersect(x)));
 			}
 		}
 		String result;

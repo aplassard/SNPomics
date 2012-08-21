@@ -2,7 +2,6 @@ package org.cchmc.bmi.snpomics.annotation.interactive;
 
 import java.util.List;
 
-import org.cchmc.bmi.snpomics.annotation.reference.GenomicSequenceAnnotation;
 import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
 import org.cchmc.bmi.snpomics.translation.AminoAcid;
 
@@ -20,31 +19,31 @@ public class TranscriptEffectAnnotation implements InteractiveAnnotation {
 	}
 	
 	@MetaAnnotation(name="Gene", description="Name of overlapping gene(s)",
-			ref={TranscriptAnnotation.class, GenomicSequenceAnnotation.class})
+			ref={TranscriptAnnotation.class})
 	public String getGeneName() {
 		return tx.getName();
 	}
 	
 	@MetaAnnotation(name="Transcript", description="Name of overlapping transcript(s)",
-			ref={TranscriptAnnotation.class, GenomicSequenceAnnotation.class})
+			ref={TranscriptAnnotation.class})
 	public String getTranscriptName() {
 		return tx.getID();
 	}
 
 	@MetaAnnotation(name="Protein", description="Name of overlapping protein(s)",
-			ref={TranscriptAnnotation.class, GenomicSequenceAnnotation.class})
+			ref={TranscriptAnnotation.class})
 	public String getProtName() {
 		return tx.getProtID();
 	}
 
 	@MetaAnnotation(name="CdnaVariation", description="HGVS nomenclature for cDNA-level changes",
-			ref={TranscriptAnnotation.class, GenomicSequenceAnnotation.class})
+			ref={TranscriptAnnotation.class})
 	public String getHgvsCdnaName() {
 		return dnaName.getName();
 	}
 
 	@MetaAnnotation(name="ProteinVariation", description="HGVS nomenclature for protein-level changes",
-			ref={TranscriptAnnotation.class, GenomicSequenceAnnotation.class})
+			ref={TranscriptAnnotation.class})
 	public String getHgvsProteinName() {
 		return protName.getName();
 	}

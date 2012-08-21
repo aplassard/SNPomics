@@ -17,6 +17,7 @@ import org.cchmc.bmi.snpomics.cli.arguments.CreateArguments;
 import org.cchmc.bmi.snpomics.cli.arguments.ImportArguments;
 import org.cchmc.bmi.snpomics.cli.arguments.ListArguments;
 import org.cchmc.bmi.snpomics.cli.arguments.MainArguments;
+import org.cchmc.bmi.snpomics.util.FastaReader;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
@@ -51,6 +52,8 @@ public class SnpomicsMain {
 		AnnotationFactory factory = new JdbcFactory();
 		if (arg.initializeBackend)
 			factory.initializeEmptyBackend();
+		if (arg.fasta != null)
+			factory.setFasta(new FastaReader(arg.fasta));
 		//Don't set the genome here - if the command is "create" it won't
 		//exist yet
 		

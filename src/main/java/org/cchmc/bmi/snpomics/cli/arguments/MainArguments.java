@@ -15,6 +15,9 @@ public class MainArguments {
 	@Parameter(names={"-g", "--genome"}, description="Genome to annotate with")
 	public String genome;
 	
+	@Parameter(names={"-f", "--fasta"}, description="Multi-fasta file of genome sequence, must have .fai")
+	public File fasta;
+	
 	@Parameter(names={"-?", "-h", "--help"}, description="help!", help=true)
 	public boolean help;
 }

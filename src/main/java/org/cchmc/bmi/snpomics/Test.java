@@ -10,8 +10,6 @@ import java.util.Map;
 
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.annotation.factory.JdbcFactory;
-import org.cchmc.bmi.snpomics.annotation.loader.GenomicSequenceLoader;
-import org.cchmc.bmi.snpomics.annotation.reference.GenomicSequenceAnnotation;
 import org.cchmc.bmi.snpomics.reader.InputIterator;
 import org.cchmc.bmi.snpomics.reader.VCFReader;
 import org.cchmc.bmi.snpomics.writer.VCFWriter;
@@ -81,10 +79,5 @@ public class Test {
 			e.printStackTrace(System.err);
 		}
 	}
-
 	
-	public static void getSequence(GenomicSequenceLoader loader, String pos) {
-		GenomicSequenceAnnotation annot = loader.loadByID(pos);
-		System.out.println(pos+" -> "+annot.getSequence());
-	}
 }

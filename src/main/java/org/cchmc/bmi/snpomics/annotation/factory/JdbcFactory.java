@@ -18,13 +18,10 @@ import java.util.UUID;
 import org.cchmc.bmi.snpomics.Genome;
 import org.cchmc.bmi.snpomics.ReferenceMetadata;
 import org.cchmc.bmi.snpomics.SnpomicsEngine;
-import org.cchmc.bmi.snpomics.annotation.importer.GenomicSequenceImporter;
 import org.cchmc.bmi.snpomics.annotation.importer.JdbcImporter;
 import org.cchmc.bmi.snpomics.annotation.importer.TranscriptImporter;
-import org.cchmc.bmi.snpomics.annotation.loader.GenomicSequenceLoader;
 import org.cchmc.bmi.snpomics.annotation.loader.JdbcLoader;
 import org.cchmc.bmi.snpomics.annotation.loader.TranscriptLoader;
-import org.cchmc.bmi.snpomics.annotation.reference.GenomicSequenceAnnotation;
 import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
 import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
 import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
@@ -57,8 +54,6 @@ public class JdbcFactory extends AnnotationFactory {
 		if (!loaderCache.containsKey(cls)) {
 			if (cls == TranscriptAnnotation.class)
 				loader = new TranscriptLoader();
-			if (cls == GenomicSequenceAnnotation.class)
-				loader = new GenomicSequenceLoader();
 			if (loader == null)
 				throw new AnnotationNotFoundException(cls.getCanonicalName());
 			loader.setConnection(connection);
@@ -74,8 +69,6 @@ public class JdbcFactory extends AnnotationFactory {
 	protected <T extends ReferenceAnnotation> JdbcImporter<T> getImporter(ReferenceMetadata<T> ref) {
 		if (ref.getAnnotationClass() == TranscriptAnnotation.class)
 			return (JdbcImporter<T>) new TranscriptImporter();
-		if (ref.getAnnotationClass() == GenomicSequenceAnnotation.class)
-			return (JdbcImporter<T>) new GenomicSequenceImporter();
 		return null;
 	}
 
@@ -269,8 +262,9 @@ public class JdbcFactory extends AnnotationFactory {
 		//Can't just return versions.get(cls) because of type-checking - so
 		//the rest of this is blatantly unsafe, "fool the compiler" type stuff
 		List<ReferenceMetadata<T>> result = new ArrayList<ReferenceMetadata<T>>();
-		for (ReferenceMetadata<?> rmd : versions.get(cls))
-			result.add((ReferenceMetadata<T>)rmd);
+		if (versions.containsKey(cls))
+			for (ReferenceMetadata<?> rmd : versions.get(cls))
+				result.add((ReferenceMetadata<T>)rmd);
 		return result;
 	}
 

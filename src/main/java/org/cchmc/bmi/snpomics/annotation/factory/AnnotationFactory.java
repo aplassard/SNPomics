@@ -10,6 +10,7 @@ import org.cchmc.bmi.snpomics.annotation.importer.AnnotationImporter;
 import org.cchmc.bmi.snpomics.annotation.loader.AnnotationLoader;
 import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
 import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
+import org.cchmc.bmi.snpomics.util.FastaReader;
 
 /**
  * <p>An AnnotationFactory manages a particular type of database (ie SQL, NoSQL, flat files)
@@ -125,4 +126,14 @@ public abstract class AnnotationFactory {
 	public boolean importData(Reader input, ReferenceMetadata<? extends ReferenceAnnotation> ref) {
 		return getImporter(ref).importAnnotations(input);
 	}
+	
+	public void setFasta(FastaReader fastaReader) {
+		fasta = fastaReader;
+	}
+	
+	public FastaReader getFasta() {
+		return fasta;
+	}
+	
+	private FastaReader fasta;
 }

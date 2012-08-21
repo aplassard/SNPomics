@@ -72,6 +72,7 @@ public class ListCommand {
 	}
 	
 	private static void printRMD(String type, ReferenceMetadata<?> rmd) {
+		if (rmd == null) return;
 		StringBuilder sb = new StringBuilder();
 		sb.append(type);
 		sb.append("\t");
