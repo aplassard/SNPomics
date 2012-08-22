@@ -1,15 +1,21 @@
 package org.cchmc.bmi.snpomics.annotation.importer;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 import org.cchmc.bmi.snpomics.GenomicSpan;
 import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
+import org.cchmc.bmi.snpomics.util.BaseUtils;
 import org.cchmc.bmi.snpomics.util.StringUtils;
 
 /**
@@ -45,6 +51,8 @@ public class TranscriptImporter extends JdbcImporter<TranscriptAnnotation> {
 
 	@Override
 	public boolean importAnnotations(Reader input) {
+		if (fasta == null)
+			throw new RuntimeException("Ack! No FastaReader!");
 		createTable();
 		BufferedReader reader = new BufferedReader(input);
 		PreparedStatement stat = null;
@@ -62,10 +70,18 @@ public class TranscriptImporter extends JdbcImporter<TranscriptAnnotation> {
 				for (String val : F[7].split(",")) {
 					exonStarts.add(new Long(Long.valueOf(val)+1).toString());
 				}
+				String[] prots = F[9].split(",");
+				String protein="";
+				if (prots != null)
+					for (String p : prots)
+						if (!p.isEmpty()) {
+							protein = p;
+							break;
+						}
 				stat.setInt(1, span.getBin());
 				stat.setString(2, F[0]);
 				stat.setString(3, F[10]);
-				stat.setString(4, F[9]);
+				stat.setString(4, protein);
 				stat.setString(5, span.getChromosome());
 				stat.setString(6, F[2]);
 				stat.setLong(7, span.getStart());
@@ -74,7 +90,12 @@ public class TranscriptImporter extends JdbcImporter<TranscriptAnnotation> {
 				stat.setLong(10, Long.parseLong(F[6]));
 				stat.setString(11, StringUtils.join(",", exonStarts));
 				stat.setString(12, F[8].substring(0, F[8].length()-1));
-				stat.execute();
+				stat.setBytes(13, compress(getSequence(span.getChromosome(), F[2], exonStarts, F[8])));
+				try {
+					stat.execute();
+				} catch (SQLIntegrityConstraintViolationException e) {
+					System.err.println("Skipping "+F[0]+"("+F[10]+"): "+e.getMessage());
+				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -89,6 +110,35 @@ public class TranscriptImporter extends JdbcImporter<TranscriptAnnotation> {
 			} catch (SQLException e) {}
 		}
 		return true;
+	}
+	
+	private byte[] compress(String toCompress) {
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		try {
+			PrintWriter output = new PrintWriter(new GZIPOutputStream(bytes));
+			output.print(toCompress);
+			output.close();
+		} catch (IOException e) {
+			throw new RuntimeException("Error compressing sequence: "+e.getMessage());
+		}
+		return bytes.toByteArray();
+
+	}
+	
+	private String getSequence(String chrom, String strand, List<String> starts, String endStr) {
+		List<String> ends = Arrays.asList(endStr.split(","));
+		//Since the UCSC string has a trailing comma, ends.size() == starts.size()+1
+		StringBuilder sb = new StringBuilder();
+		GenomicSpan exon = new GenomicSpan();
+		exon.setChromosome(chrom);
+		for (int i=0; i<starts.size(); i++) {
+			exon.setStart(Long.parseLong(starts.get(i)));
+			exon.setEnd(Long.parseLong(ends.get(i)));
+			sb.append(fasta.getSequence(exon));
+		}
+		if (strand.equals("-"))
+			return BaseUtils.reverseComplement(sb.toString());
+		return sb.toString();
 	}
 
 	@Override
@@ -106,6 +156,7 @@ public class TranscriptImporter extends JdbcImporter<TranscriptAnnotation> {
 			"cdsEnd int(10) UNSIGNED NOT NULL, "+
 			"exonStarts varbinary(5000) NOT NULL, "+
 			"exonEnds varbinary(5000) NOT NULL, "+
+			"txSequence blob NOT NULL, "+
 			"PRIMARY KEY (id), "+
 			"INDEX bin (chrom, bin))";
 	}
@@ -113,7 +164,7 @@ public class TranscriptImporter extends JdbcImporter<TranscriptAnnotation> {
 	private String tableInsertStmt() {
 		return "INSERT INTO `"+tableName+"` SET "+
 			"bin=?, id=?, gene=?, protein=?, chrom=?, strand=?, txStart=?, txEnd=?, cdsStart=?, "+
-			"cdsEnd=?, exonStarts=?, exonEnds=?";
+			"cdsEnd=?, exonStarts=?, exonEnds=?, txSequence=?";
 	}
 	
 }

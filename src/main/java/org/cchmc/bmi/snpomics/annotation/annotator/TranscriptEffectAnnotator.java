@@ -14,7 +14,6 @@ import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
 import org.cchmc.bmi.snpomics.translation.AminoAcid;
 import org.cchmc.bmi.snpomics.translation.GeneticCode;
 import org.cchmc.bmi.snpomics.util.BaseUtils;
-import org.cchmc.bmi.snpomics.util.FastaReader;
 
 public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnnotation> {
 
@@ -22,8 +21,6 @@ public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnno
 	public List<TranscriptEffectAnnotation> annotate(SimpleVariant variant,
 			AnnotationFactory factory) throws AnnotationNotFoundException {
 		TranscriptLoader loader = (TranscriptLoader) factory.getLoader(TranscriptAnnotation.class);
-		FastaReader seqLoader = factory.getFasta();
-		//TODO: throw exception if seqLoader is null
 		GeneticCode code = GeneticCode.getTable(factory.getGenome().getTransTableId(variant.getPosition().getChromosome()));
 		List<TranscriptEffectAnnotation> result = new ArrayList<TranscriptEffectAnnotation>();
 		for (TranscriptAnnotation tx : loader.loadByOverlappingPosition(variant.getPosition())) {
@@ -60,7 +57,8 @@ public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnno
 					effect.setCdnaEndCoord(getHgvsCoord(tx, endCoord));
 			}
 			HgvsDnaName dna = effect.getHgvsCdnaObject();
-			if (dna.isCoding()) {
+			if (dna.isCoding() && (tx.getCdsLength() % 3 == 0)) {
+				loader.loadSequence(tx);
 				int cdnaStart = dna.getNearestCodingNtToStart();
 				int cdnaEnd = dna.getNearestCodingNtToEnd();
 				//Revert the insertion coordinates
@@ -70,11 +68,11 @@ public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnno
 					cdnaStart++;
 					cdnaEnd--;
 				}
-				String cdsSeq = getCDS(seqLoader, tx);
+				String cdsSeq = tx.getCodingSequence();
 				int codonStart = (cdnaStart-1) / 3 + 1;
 				int codonEnd = (cdnaEnd-1) / 3 + 1;
 				if (codonStart > 1) codonStart--;
-				if (codonEnd*3 < cdsSeq.length()) codonEnd++;
+				if ((codonEnd+1)*3 < cdsSeq.length()) codonEnd++;
 				effect.setProtStartPos(codonStart);
 				String refDNA = cdsSeq.substring((codonStart-1)*3, codonEnd*3);
 				String altDNA = refDNA.substring(0, cdnaStart-(codonStart-1)*3-1) +
@@ -86,7 +84,8 @@ public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnno
 					effect.setProtFrameshift(true);
 					altDNA += cdsSeq.substring(codonEnd*3);
 				}
-				effect.setProtExtension(code.translate(cdsSeq.substring(codonEnd*3)));
+				effect.setProtExtension(code.translate(cdsSeq.substring(codonEnd*3)+
+						tx.getTranscribedSequence().substring(tx.get5UtrLength()+tx.getCdsLength())));
 				effect.setProtAltAllele(code.translate(altDNA));
 			}
 			
@@ -157,28 +156,6 @@ public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnno
 			sb.append(closestdist);
 			return sb.toString();
 		}
-	}
-
-	/**
-	 * Loads the CDS sequence for tx
-	 * @param loader
-	 * @param tx
-	 * @return
-	 */
-	private String getCDS(FastaReader fasta, TranscriptAnnotation tx) {
-		StringBuilder sb = new StringBuilder();
-		GenomicSpan cds = tx.getCds();
-		for (GenomicSpan x : tx.getExons()) {
-			if (cds.overlaps(x)) {
-				sb.append(fasta.getSequence(cds.intersect(x)));
-			}
-		}
-		String result;
-		if (tx.isOnForwardStrand())
-			result = sb.toString();
-		else
-			result = BaseUtils.reverseComplement(sb.toString());
-		return result;
 	}
 
 	@Override

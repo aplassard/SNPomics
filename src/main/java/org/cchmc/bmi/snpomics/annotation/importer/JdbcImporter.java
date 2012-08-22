@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
+import org.cchmc.bmi.snpomics.util.FastaReader;
 
 public abstract class JdbcImporter<T extends ReferenceAnnotation> implements
 		AnnotationImporter<T> {
@@ -35,6 +36,12 @@ public abstract class JdbcImporter<T extends ReferenceAnnotation> implements
 
 	}
 	
+	@Override
+	public void setFastaReader(FastaReader fasta) {
+		this.fasta = fasta;
+	}
+
 	protected String tableName;
 	protected Connection connection;
+	protected FastaReader fasta=null;
 }

@@ -67,9 +67,13 @@ public class JdbcFactory extends AnnotationFactory {
 	@SuppressWarnings("unchecked")
 	@Override
 	protected <T extends ReferenceAnnotation> JdbcImporter<T> getImporter(ReferenceMetadata<T> ref) {
+		JdbcImporter<T> importer = null;
 		if (ref.getAnnotationClass() == TranscriptAnnotation.class)
-			return (JdbcImporter<T>) new TranscriptImporter();
-		return null;
+			importer = (JdbcImporter<T>) new TranscriptImporter();
+		if (importer == null)
+			throw new RuntimeException("Can't get an Importer for "+ref.getClass().getCanonicalName());
+		importer.setFastaReader(getFasta());
+		return importer;
 	}
 
 	/**

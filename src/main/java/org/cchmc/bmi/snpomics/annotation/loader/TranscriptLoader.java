@@ -1,10 +1,15 @@
 package org.cchmc.bmi.snpomics.annotation.loader;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import org.cchmc.bmi.snpomics.GenomicSpan;
 import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
@@ -22,7 +27,7 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 		PreparedStatement stat = null;
 		ResultSet rs = null;
 		try {
-			stat = connection.prepareStatement("SELECT * FROM `"+tableName+"` WHERE id=?");
+			stat = connection.prepareStatement("SELECT "+columnsToSelect+" FROM `"+tableName+"` WHERE id=?");
 			stat.setString(1, id);
 			rs = stat.executeQuery();
 			if (rs.next())
@@ -45,7 +50,7 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 		PreparedStatement stat = null;
 		ResultSet rs = null;
 		try {
-			stat = connection.prepareStatement("SELECT * FROM `"+tableName+"` WHERE gene=?");
+			stat = connection.prepareStatement("SELECT "+columnsToSelect+" FROM `"+tableName+"` WHERE gene=?");
 			stat.setString(1, name);
 			rs = stat.executeQuery();
 			while (rs.next())
@@ -72,8 +77,8 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 			PreparedStatement stat = null;
 			ResultSet rs = null;
 			try {
-				stat = connection.prepareStatement("SELECT * FROM `"+tableName+"` WHERE chrom=?"+
-						" AND bin=? AND txEnd>=? AND txStart<=?");
+				stat = connection.prepareStatement("SELECT "+columnsToSelect+" FROM `"+tableName+
+						"` WHERE chrom=? AND bin=? AND txEnd>=? AND txStart<=?");
 				stat.setString(1, cacheRegion.getChromosome());
 				stat.setLong(3, cacheRegion.getStart());
 				stat.setLong(4, cacheRegion.getEnd());
@@ -107,8 +112,8 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 		PreparedStatement stat = null;
 		ResultSet rs = null;
 		try {
-			stat = connection.prepareStatement("SELECT * FROM `"+tableName+"` WHERE chrom=?"+
-					" AND bin=? AND txEnd=? AND txStart=?");
+			stat = connection.prepareStatement("SELECT "+columnsToSelect+" FROM `"+tableName+
+					"` WHERE chrom=? AND bin=? AND txEnd=? AND txStart=?");
 			stat.setString(1, position.getChromosome());
 			stat.setInt(2, bin);
 			stat.setLong(3, position.getStart());
@@ -126,6 +131,39 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 			} catch (SQLException e) {}
 		}
 		return result;
+	}
+	
+	public boolean loadSequence(TranscriptAnnotation tx) {
+		if (!tx.getTranscribedSequence().isEmpty())
+			return true;
+		PreparedStatement stat = null;
+		ResultSet rs = null;
+		try {
+			stat = connection.prepareStatement("SELECT txSequence FROM `"+tableName+"` WHERE id=?");
+			stat.setString(1, tx.getID());
+			rs = stat.executeQuery();
+			if (rs.next()) {
+				BufferedReader reader = new BufferedReader(
+										new InputStreamReader(
+										new GZIPInputStream(
+										new ByteArrayInputStream(rs.getBytes(1)))));
+				tx.setTranscribedSequence(reader.readLine());
+				reader.close();
+
+				return true;
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("Error decompressing sequence: "+e.getMessage());
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			try {
+				if (stat != null)
+					stat.close();
+			} catch (SQLException e) {}
+		}
+		return false;
 	}
 	
 	private TranscriptAnnotation createTranscriptFromRS(ResultSet rs) {
@@ -159,4 +197,6 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 
 	private GenomicSpan cacheRegion;
 	private List<TranscriptAnnotation> cache;
+	private String columnsToSelect = 
+		"id, gene, protein, chrom, strand, txStart, txEnd, cdsStart, cdsEnd, exonStarts, exonEnds";
 }

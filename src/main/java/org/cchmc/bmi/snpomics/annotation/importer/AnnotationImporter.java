@@ -3,6 +3,7 @@ package org.cchmc.bmi.snpomics.annotation.importer;
 import java.io.Reader;
 
 import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
+import org.cchmc.bmi.snpomics.util.FastaReader;
 
 /**
  * Loads annotations into a datastore (ie, sql database).  This is a very simple interface,
@@ -20,4 +21,6 @@ public interface AnnotationImporter<T extends ReferenceAnnotation> {
 	 * @return true on success
 	 */
 	boolean importAnnotations(Reader input);
+	
+	void setFastaReader(FastaReader fasta);
 }

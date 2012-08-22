@@ -1,0 +1,24 @@
+Flag transcripts with invalid CDS
+Add new Properties (default Genome, default Fasta)
+Add options to change reference (use version, set default version)
+Add I/O options (don't output genotypes, skip failed variants)
+Standardize Exception hierarchy/handling
+Fix Maven naming (SNPomics-1.0-SNAPSHOT-jar-with-dependencies.jar?)
+Add annotation Group support
+Expand CLI properties support (delete properties?)
+Register requested OutputFields with InteractiveAnnotations to allow optimizations? (eg, don't calculate protein effects if not needed)
+If only one genome in db, select automatically
+Use correct translation table for Alt chromosomes
+Rollback database writes on failure
+
+Bugs:
+Protein names when variant spans exon/intron junction (how to annotate?)
+Protein names when duplicating insertions > 1bp on reverse strand
+cDNA names - duplicating insertions
+VCF output is invalid for p.(=) - can't have = in an INFO field
+
+Annotations:
+More detail on TranscriptEffects - Impact, position in gene (exon/intron/UTR), effect (syn/nonsyn/nonsense/etc)
+dbSNP (how much detail?  Gets unwieldy)
+Other MAF sources (ESP)
+Andrew's TFBS stuff

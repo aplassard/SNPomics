@@ -38,6 +38,20 @@ public class TranscriptAnnotation implements MappedAnnotation {
 	public void setProtID(String protID) {
 		this.protID = protID;
 	}
+	
+	public String getTranscribedSequence() {
+		return txSequence;
+	}
+	
+	public void setTranscribedSequence(String txSequence) {
+		this.txSequence = txSequence;
+	}
+	
+	public String getCodingSequence() {
+		if (isProteinCoding() && !txSequence.isEmpty())
+			return txSequence.substring(get5UtrLength(), get5UtrLength()+getCdsLength());
+		return "";
+	}
 
 	public void setPosition(GenomicSpan pos) {
 		this.pos = pos.clone();
@@ -139,6 +153,7 @@ public class TranscriptAnnotation implements MappedAnnotation {
 	private String id; //transcript
 	private String name; //gene
 	private String protID; //protein
+	private String txSequence = "";
 	private GenomicSpan pos;
 	private GenomicSpan cds;
 	private boolean onForwardStrand;
