@@ -21,7 +21,7 @@ public class CreateArguments {
 	@Parameter(names="--url", description="Source URL of assembly", required=true)
 	public String sourceURL;
 	
-	@Parameter(names="--transTable", description="Translation Table in use (default 1, see http://ncbi.nlm.nih.gov/Taxonomy/taxonomyhome.html/index.cgi?chapter=cgencodes)", required=true)
+	@Parameter(names="--transTable", description="Translation Table in use (default 1, see http://ncbi.nlm.nih.gov/Taxonomy/taxonomyhome.html/index.cgi?chapter=cgencodes)")
 	public Integer transTable = 1;
 	
 	@Parameter(names="--altTransTable", description="Alternate Translation Table used, eg by mitochondria")

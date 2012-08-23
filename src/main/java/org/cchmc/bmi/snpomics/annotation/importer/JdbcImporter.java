@@ -18,11 +18,20 @@ public abstract class JdbcImporter<T extends ReferenceAnnotation> implements
 	
 	protected abstract String tableCreationStmt();
 	
+	/**
+	 * SQLite doesn't support generic index creation in a CREATE TABLE,
+	 * so we have to separate that part out
+	 * @return
+	 */
+	protected String indexCreationStmt() { return ""; }
+	
 	protected boolean createTable() {
 		Statement stat = null;
 		try {
 			stat = connection.createStatement();
 			stat.executeUpdate(tableCreationStmt());
+			if (!indexCreationStmt().isEmpty())
+				stat.executeUpdate(indexCreationStmt());
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;

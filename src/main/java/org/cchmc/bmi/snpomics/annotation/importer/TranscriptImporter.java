@@ -144,27 +144,31 @@ public class TranscriptImporter extends JdbcImporter<TranscriptAnnotation> {
 	@Override
 	protected String tableCreationStmt() {
 		return "CREATE TABLE `"+tableName+"` ("+
-			"bin smallint(5) UNSIGNED NOT NULL, "+
+			"bin smallint(5) NOT NULL, "+
 			"id varchar(30) NOT NULL, "+
 			"gene varchar(50) NOT NULL, "+
 			"protein varchar(30) NOT NULL, "+
 			"chrom varchar(30) NOT NULL, "+
 			"strand char(1) NOT NULL, "+
-			"txStart int(10) UNSIGNED NOT NULL, "+
-			"txEnd int(10) UNSIGNED NOT NULL, "+
-			"cdsStart int(10) UNSIGNED NOT NULL, "+
-			"cdsEnd int(10) UNSIGNED NOT NULL, "+
+			"txStart int(10) NOT NULL, "+
+			"txEnd int(10) NOT NULL, "+
+			"cdsStart int(10) NOT NULL, "+
+			"cdsEnd int(10) NOT NULL, "+
 			"exonStarts varbinary(5000) NOT NULL, "+
 			"exonEnds varbinary(5000) NOT NULL, "+
 			"txSequence blob NOT NULL, "+
-			"PRIMARY KEY (id), "+
-			"INDEX bin (chrom, bin))";
+			"PRIMARY KEY (id))";
 	}
-	
+		
+	@Override
+	protected String indexCreationStmt() {
+		return "CREATE INDEX bin ON `"+tableName+"` (chrom, bin)";
+	}
+
 	private String tableInsertStmt() {
-		return "INSERT INTO `"+tableName+"` SET "+
-			"bin=?, id=?, gene=?, protein=?, chrom=?, strand=?, txStart=?, txEnd=?, cdsStart=?, "+
-			"cdsEnd=?, exonStarts=?, exonEnds=?, txSequence=?";
+		return "INSERT INTO `"+tableName+"` " +
+				"(bin, id, gene, protein, chrom, strand, txStart, txEnd, cdsStart, cdsEnd, " +
+				"exonStarts, exonEnds, txSequence) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	}
 	
 }

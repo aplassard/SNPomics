@@ -151,10 +151,10 @@ public class JdbcFactory extends AnnotationFactory {
 			stat.executeUpdate("CREATE TABLE genomes ("+
 					"id varchar(30) NOT NULL, "+
 					"organism varchar(60) NOT NULL, "+
-					"taxid int(10) UNSIGNED NOT NULL, "+
+					"taxid int(10) NOT NULL, "+
 					"sourceURI varchar(255) NOT NULL, "+
-					"translateTable smallint(3) UNSIGNED NOT NULL, "+
-					"altTranslateTable smallint(3) UNSIGNED NOT NULL, "+
+					"translateTable smallint(3) NOT NULL, "+
+					"altTranslateTable smallint(3) NOT NULL, "+
 					"altTranslateChroms varchar(255) NOT NULL, "+
 					"PRIMARY KEY (id))");
 			stat.executeUpdate("CREATE TABLE `references` ("+
@@ -238,9 +238,9 @@ public class JdbcFactory extends AnnotationFactory {
 	public void createGenome(Genome newGenome) {
 		PreparedStatement stat = null;
 		try {
-			stat = connection.prepareStatement("INSERT INTO genomes SET "+
-					"id=?, organism=?, taxid=?, sourceURI=?, translateTable=?, "+
-					"altTranslateTable=?, altTranslateChroms=?");
+			stat = connection.prepareStatement("INSERT INTO genomes " +
+					"(id, organism, taxid, sourceURI, translateTable, altTranslateTable, altTranslateChroms) " +
+					"VALUES (?, ?, ?, ?, ?, ?, ?)");
 			stat.setString(1, newGenome.getName());
 			stat.setString(2, newGenome.getOrganism());
 			stat.setInt(3, newGenome.getTaxId());
@@ -317,18 +317,25 @@ public class JdbcFactory extends AnnotationFactory {
 		//Set up the references entry and import
 		JdbcImporter<?> importer = getImporter(ref);
 		//Generate a table name and verify that it's not already used;
+		
+		/*
+		 * Ack!  SQLite doesn't recognize SHOW TABLES!  The canonical method to get a list of
+		 * tables seems to be SELECT * FROM dbname.sqlite_master WHERE type='table';
+		 * Which obviously won't work in other DBs.  So instead, I guess we'll abuse Java exceptions
+		 */
 		String tableName = "";
 		boolean isNameUnused = false;
-		PreparedStatement stat = null;
-		ResultSet rs = null;
+		Statement stat = null;
 		try {
-			stat = connection.prepareStatement("SHOW TABLES LIKE ?");
+			String stmt = "SELECT 1 FROM `";
+			stat = connection.createStatement();
 			do {
 				tableName = UUID.randomUUID().toString();
-				stat.setString(1, tableName);
-				rs = stat.executeQuery();
-				isNameUnused = !rs.next();
-				rs.close();
+				try {
+					stat.executeQuery(stmt+tableName+"`");
+				} catch (SQLException e) {
+					isNameUnused = true;
+				}
 			} while (!isNameUnused);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -341,28 +348,29 @@ public class JdbcFactory extends AnnotationFactory {
 		stat = null;
 		
 		//Update the references table
+		PreparedStatement pstat = null;
 		try {
-			stat = connection.prepareStatement("INSERT INTO `references` SET "+
-					"genome=?, javaclass=?, version=?, tablename=?, "+
-					"updated=?, linktemplate=?, sourceURI=?, defaultVersion=?");
-			stat.setString(1, ref.getGenome());
-			stat.setString(2, ref.getAnnotationClass().getCanonicalName());
-			stat.setString(3, ref.getVersion());
-			stat.setString(4, tableName);
+			pstat = connection.prepareStatement("INSERT INTO `references` " +
+					"(genome, javaclass, version, tablename, updated, linktemplate, " +
+					"sourceURI, defaultVersion) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+			pstat.setString(1, ref.getGenome());
+			pstat.setString(2, ref.getAnnotationClass().getCanonicalName());
+			pstat.setString(3, ref.getVersion());
+			pstat.setString(4, tableName);
 			if (ref.getUpdateDate() != null)
-				stat.setDate(5, new java.sql.Date(ref.getUpdateDate().getTime()));
+				pstat.setDate(5, new java.sql.Date(ref.getUpdateDate().getTime()));
 			else
-				stat.setNull(5, java.sql.Types.DATE);
-			stat.setString(6, ref.getLinkTemplate());
-			stat.setString(7, ref.getSource().toString());
-			stat.setBoolean(8, ref.isDefault());
-			stat.execute();
+				pstat.setNull(5, java.sql.Types.DATE);
+			pstat.setString(6, ref.getLinkTemplate());
+			pstat.setString(7, ref.getSource().toString());
+			pstat.setBoolean(8, ref.isDefault());
+			pstat.execute();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			try {
-				if (stat != null)
-					stat.close();
+				if (pstat != null)
+					pstat.close();
 			} catch (SQLException e) {}
 		}
 		
