@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.cchmc.bmi.snpomics.OutputField;
 import org.cchmc.bmi.snpomics.SnpomicsEngine;
@@ -25,7 +26,24 @@ public class AnnotateCommand {
 	public static void run(AnnotationFactory factory, AnnotateArguments args) {
 		try {
 			InputIterator input = constructInput(args.inputFile, args.inputType);
+			input.setDynamicParameters(args.inputOptions);
+			
+			//Validate args.inputOptions
+			Set<String> validKeys = input.getAvailableParameters().keySet();
+			for (String key : args.inputOptions.keySet()) {
+				if (!validKeys.contains(key))
+					System.err.println("WARN: Unknown input option '"+key+"', ignoring");
+			}
+			
 			VariantWriter output = constructOutput(args.outputFile, args.outputType);
+			output.setDynamicParameters(args.outputOptions);
+
+			//Validate args.outputOptions
+			validKeys = output.getAvailableParameters().keySet();
+			for (String key : args.outputOptions.keySet()) {
+				if (!validKeys.contains(key))
+					System.err.println("WARN: Unknown output option '"+key+"', ignoring");
+			}
 
 			Map<String, OutputField> potentialFields = SnpomicsEngine.getAllowedOutput();
 			

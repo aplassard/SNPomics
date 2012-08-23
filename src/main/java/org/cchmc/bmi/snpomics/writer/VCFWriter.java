@@ -59,7 +59,7 @@ public class VCFWriter implements VariantWriter {
 		}
 		@Override
 		public String getHeaderLine() {
-			if (hasGenotypes()) {
+			if (writeGenotypes && hasGenotypes()) {
 				ArrayList<String> f = new ArrayList<String>();
 				f.add(headerLine);
 				f.add("FORMAT");
@@ -109,7 +109,7 @@ public class VCFWriter implements VariantWriter {
 		}
 		@Override
 		public String getHeaderLine() {
-			if (hasGenotypes()) {
+			if (writeGenotypes && hasGenotypes()) {
 				ArrayList<String> f = new ArrayList<String>();
 				f.add(headerLine);
 				f.add("FORMAT");
@@ -158,6 +158,7 @@ public class VCFWriter implements VariantWriter {
 	}
 	
 	public VCFWriter() {
+		writeGenotypes = true;
 	}
 	
 	@Override
@@ -248,7 +249,7 @@ public class VCFWriter implements VariantWriter {
 		}
 		fields.add(infoStr.isEmpty() ? "." : StringUtils.join(";", infoStr));
 		
-		if (helper.hasGenotypes())
+		if (writeGenotypes && helper.hasGenotypes())
 			fields.add(helper.getGenotypes());
 		
 		output.println(StringUtils.join("\t", fields));
@@ -279,8 +280,32 @@ public class VCFWriter implements VariantWriter {
 		return Collections.emptySet();
 	}
 
+	@Override
+	public void setDynamicParameters(Map<String, String> param) {
+		if (param.containsKey(GENOTYPE_OPTION)) {
+			String value = param.get(GENOTYPE_OPTION).toLowerCase();
+			if (value.equals("1") || "yes".startsWith(value) || "true".startsWith(value))
+				writeGenotypes = true;
+			else
+				writeGenotypes = false;
+		}
+	}
+
+	@Override
+	public Map<String, String> getAvailableParameters() {
+		return recognizedOptions;
+	}
+
 	private PrintWriter output;
 	private List<OutputField> annotationList;
 	private VCFHelper helper;
 	private static final Pattern nonEmptyAnnotation = Pattern.compile("[^,|]");
+	private boolean writeGenotypes;
+	private static Map<String, String> recognizedOptions;
+	private static final String GENOTYPE_OPTION = "genotype";
+	
+	static {
+		recognizedOptions = new HashMap<String, String>();
+		recognizedOptions.put(GENOTYPE_OPTION, "Write sample-level genotypes, or a 'sites-only' VCF?");
+	}
 }

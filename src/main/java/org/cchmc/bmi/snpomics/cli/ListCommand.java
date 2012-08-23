@@ -31,6 +31,8 @@ public class ListCommand {
 		case PARAMETERS : listParameters(); break;
 		case READERS : listReaders(); break;
 		case WRITERS : listWriters(); break;
+		case READER_OPTIONS : listReaderOptions(); break;
+		case WRITER_OPTIONS : listWriterOptions(); break;
 		}		
 	}
 
@@ -148,4 +150,37 @@ public class ListCommand {
 		}
 	}
 
+	private static void listReaderOptions() {
+		System.out.println("Name	Option	Description");
+		Map<String, Class<? extends InputIterator>> inputs = SnpomicsEngine.getReaders();
+		for (Class<? extends InputIterator> cls : inputs.values()) {
+			try {
+				InputIterator it = cls.newInstance();
+				Map<String, String> options = it.getAvailableParameters();
+				for (String opt : options.keySet())
+					System.out.println(it.name()+"\t"+opt+"\t"+options.get(opt));
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private static void listWriterOptions() {
+		System.out.println("Name	Option	Description");
+		Map<String, Class<? extends VariantWriter>> outputs = SnpomicsEngine.getWriters();
+		for (Class<? extends VariantWriter> cls : outputs.values()) {
+			try {
+				VariantWriter it = cls.newInstance();
+				Map<String, String> options = it.getAvailableParameters();
+				for (String opt : options.keySet())
+					System.out.println(it.name()+"\t"+opt+"\t"+options.get(opt));
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 }

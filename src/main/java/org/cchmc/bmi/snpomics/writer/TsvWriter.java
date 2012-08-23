@@ -3,8 +3,10 @@ package org.cchmc.bmi.snpomics.writer;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.cchmc.bmi.snpomics.OutputField;
@@ -113,5 +115,15 @@ public class TsvWriter implements VariantWriter {
 		Set<String> result = new HashSet<String>();
 		result.add("tsv");
 		return result;
+	}
+
+	@Override
+	public void setDynamicParameters(Map<String, String> param) {
+		//No-op - no parameters!
+	}
+
+	@Override
+	public Map<String, String> getAvailableParameters() {
+		return Collections.emptyMap();
 	}
 }

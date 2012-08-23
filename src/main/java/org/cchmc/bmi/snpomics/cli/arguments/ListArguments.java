@@ -9,10 +9,10 @@ import com.beust.jcommander.Parameters;
 public class ListArguments {
 
 	public static enum ListableItem { 
-		GENOMES, REFERENCES, DEFAULT_REFERENCES, ANNOTATIONS, PARAMETERS, READERS, WRITERS };
+		GENOMES, REFERENCES, DEFAULT_REFERENCES, ANNOTATIONS, PARAMETERS, READERS, WRITERS, READER_OPTIONS, WRITER_OPTIONS };
 	
 	@Parameter(description="Values to list - one of (genomes, annotations, references, " +
-			"default_references, parameters, readers, or writers)", required=true)
+			"default_references, parameters, readers, writers, reader_options, or writer_options)", required=true)
 	public List<ListableItem> toList;
 
 }

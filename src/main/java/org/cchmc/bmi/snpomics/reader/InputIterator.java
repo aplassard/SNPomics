@@ -1,6 +1,7 @@
 package org.cchmc.bmi.snpomics.reader;
 
 import java.io.BufferedReader;
+import java.util.Map;
 import java.util.Set;
 
 import org.cchmc.bmi.snpomics.Variant;
@@ -14,6 +15,23 @@ import org.cchmc.bmi.snpomics.Variant;
  *
  */
 public interface InputIterator {
+	
+	/**
+	 * This method provides a mechanism for individual readers to specify their own custom options.
+	 * For instance, a GVF file represents a single sample, which isn't necessarily identified in
+	 * the file itself.  So a GVFReader might want (or even require) a "sampleName" parameter,
+	 * which wouldn't make sense for a VCFReader.
+	 * @param param
+	 */
+	void setDynamicParameters(Map<String, String> param);
+	
+	/**
+	 * Allows an engine to discover the DynamicParameters this reader recognizes.  The returned
+	 * Map should include the parameter itself as the key and a short, one-sentence description
+	 * as the value
+	 * @return
+	 */
+	Map<String, String> getAvailableParameters();
 	
 	/**
 	 * Sets the Reader to be used by this InputIterator

@@ -19,6 +19,7 @@ public class VCFReader implements GenotypeIterator {
 	
 	public VCFReader() {
 		isInitialized = false;
+		skipFiltered = false;
 	}
 	
 	@Override
@@ -44,8 +45,8 @@ public class VCFReader implements GenotypeIterator {
 				}
 				if (line.startsWith("#")) {
 					String[] f = line.trim().split("\t");
-					if (f.length > 8)
-						samples = new ArrayList<String>(Arrays.asList(f).subList(9, f.length));
+					if (f.length >= VCF_FIRST_SAMP_FIELD)
+						samples = new ArrayList<String>(Arrays.asList(f).subList(VCF_FIRST_SAMP_FIELD, f.length));
 					else
 						samples = Collections.emptyList();
 					return;
@@ -70,12 +71,14 @@ public class VCFReader implements GenotypeIterator {
 	@Override
 	public boolean next() {
 		try {
-			String line = in.readLine();
-			if (line == null) {
-				fields = null;
-				return false;
-			}
-			fields = line.trim().split("\t");
+			do {
+				String line = in.readLine();
+				if (line == null) {
+					fields = null;
+					return false;
+				}
+				fields = line.trim().split("\t");
+			} while (skipFiltered && !getFilter().equals(VCF_PASS));
 		} catch (IOException e) {
 			fields = null;
 			return false;
@@ -87,16 +90,16 @@ public class VCFReader implements GenotypeIterator {
 	public Variant getVariant() {
 		Variant result = new Variant();
 		GenomicSpan position = new GenomicSpan();
-		position.setChromosome(fields[0]);
-		position.setStart(Long.parseLong(fields[1]));
-		position.setEnd(position.getStart()+fields[3].length()-1);
+		position.setChromosome(fields[VCF_CHROM_FIELD]);
+		position.setStart(Long.parseLong(fields[VCF_POS_FIELD]));
+		position.setEnd(position.getStart()+fields[VCF_REF_FIELD].length()-1);
 		result.setPosition(position);
-		result.setRef(fields[3]);
-		result.setAlt(Arrays.asList(fields[4].split(",")));
-		if (fields[2] != ".")
-			result.setId(fields[2]);
-		if (fields[5] != ".")
-			result.setQualString(fields[5]);
+		result.setRef(fields[VCF_REF_FIELD]);
+		result.setAlt(Arrays.asList(fields[VCF_ALT_FIELD].split(",")));
+		if (fields[VCF_ID_FIELD] != ".")
+			result.setId(fields[VCF_ID_FIELD]);
+		if (fields[VCF_QUAL_FIELD] != ".")
+			result.setQualString(fields[VCF_QUAL_FIELD]);
 		return result;
 	}
 	
@@ -105,8 +108,8 @@ public class VCFReader implements GenotypeIterator {
 		if (!hasGenotypes())
 			return Collections.emptyList();
 		ArrayList<AnnotatedGenotype> gt = new ArrayList<AnnotatedGenotype>();
-		String[] format = fields[8].split(":");
-		for (int i=9;i<fields.length;i++) {
+		String[] format = fields[VCF_FORMAT_FIELD].split(":");
+		for (int i=VCF_FIRST_SAMP_FIELD;i<fields.length;i++) {
 			AnnotatedGenotype geno = new AnnotatedGenotype();
 			String[] val = fields[i].split(":");
 			if (!val[0].startsWith(".")) {
@@ -130,7 +133,7 @@ public class VCFReader implements GenotypeIterator {
 	 */
 	public String getRawGenotypesAndFormat() {
 		if (hasGenotypes())
-			return StringUtils.join("\t", Arrays.asList(fields).subList(8, fields.length));
+			return StringUtils.join("\t", Arrays.asList(fields).subList(VCF_FORMAT_FIELD, fields.length));
 		return "";
 	}
 	
@@ -141,7 +144,7 @@ public class VCFReader implements GenotypeIterator {
 	 */
 	public Map<String, String> getInfo() {
 		HashMap<String, String> result = new HashMap<String, String>();
-		for (String info : fields[7].split(";")) {
+		for (String info : fields[VCF_INFO_FIELD].split(";")) {
 			String[] f = info.split("=");
 			result.put(f[0], f.length > 1 ? f[1] : null);
 		}
@@ -158,7 +161,7 @@ public class VCFReader implements GenotypeIterator {
 	}
 	
 	public String getFilter() {
-		return fields[6];
+		return fields[VCF_FILTER_FIELD];
 	}
 
 	@Override
@@ -181,9 +184,45 @@ public class VCFReader implements GenotypeIterator {
 		return Collections.emptySet();
 	}
 
+	@Override
+	public void setDynamicParameters(Map<String, String> param) {
+		if (param.containsKey(SKIP_FAILED_OPTION)) {
+			String value = param.get(SKIP_FAILED_OPTION).toLowerCase();
+			if (value.equals("1") || "yes".startsWith(value) || "true".startsWith(value))
+				skipFiltered = true;
+			else
+				skipFiltered = false;
+		}
+	}
+
+	@Override
+	public Map<String, String> getAvailableParameters() {
+		return recognizedOptions;
+	}
+
 	private boolean isInitialized;
 	private BufferedReader in;
 	private ArrayList<String> headers;
 	private List<String> samples;
 	private String[] fields;
+	private static Map<String, String> recognizedOptions;
+	private boolean skipFiltered;
+	
+	private static final String VCF_PASS = "PASS";
+	private static final String SKIP_FAILED_OPTION = "skipFiltered";
+	private static final int VCF_CHROM_FIELD = 0;
+	private static final int VCF_POS_FIELD = 1;
+	private static final int VCF_ID_FIELD = 2;
+	private static final int VCF_REF_FIELD = 3;
+	private static final int VCF_ALT_FIELD = 4;
+	private static final int VCF_QUAL_FIELD = 5;
+	private static final int VCF_FILTER_FIELD = 6;
+	private static final int VCF_INFO_FIELD = 7;
+	private static final int VCF_FORMAT_FIELD = 8;
+	private static final int VCF_FIRST_SAMP_FIELD = 9;
+
+	static {
+		recognizedOptions = new HashMap<String, String>();
+		recognizedOptions.put(SKIP_FAILED_OPTION, "Skips over variants that have any value but 'PASS' in the FILTER column");
+	}
 }

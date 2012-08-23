@@ -2,8 +2,11 @@ package org.cchmc.bmi.snpomics.cli.arguments;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.beust.jcommander.DynamicParameter;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
@@ -24,4 +27,10 @@ public class AnnotateArguments {
 
 	@Parameter(names={"-f", "--fields"}, description="Annotation fields to include in output")
 	public List<String> fields = Collections.emptyList();
+	
+	@DynamicParameter(names="-I", description="Optional parameters for reader")
+	public Map<String, String> inputOptions = new HashMap<String, String>();
+
+	@DynamicParameter(names="-O", description="Optional parameters for writer")
+	public Map<String, String> outputOptions = new HashMap<String, String>();
 }
