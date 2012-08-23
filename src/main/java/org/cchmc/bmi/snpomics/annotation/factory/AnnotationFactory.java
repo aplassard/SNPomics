@@ -1,11 +1,13 @@
 package org.cchmc.bmi.snpomics.annotation.factory;
 
+import java.io.File;
 import java.io.Reader;
 import java.util.List;
 import java.util.Set;
 
 import org.cchmc.bmi.snpomics.Genome;
 import org.cchmc.bmi.snpomics.ReferenceMetadata;
+import org.cchmc.bmi.snpomics.SnpomicsEngine;
 import org.cchmc.bmi.snpomics.annotation.importer.AnnotationImporter;
 import org.cchmc.bmi.snpomics.annotation.loader.AnnotationLoader;
 import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
@@ -131,7 +133,18 @@ public abstract class AnnotationFactory {
 		fasta = fastaReader;
 	}
 	
+	/**
+	 * Returns the FastaReader previously set by a call to setFasta().  If none has previously
+	 * been set, attempts to create a FastaReader from the file specified in the default.fasta
+	 * Snpomics Property.
+	 * @return Either a FastaReader, or null if none has been set or is listed as a default
+	 */
 	public FastaReader getFasta() {
+		if (fasta == null) {
+			String defaultFasta = SnpomicsEngine.getProperty("default.fasta");
+			if (defaultFasta != null)
+				fasta = new FastaReader(new File(defaultFasta));
+		}
 		return fasta;
 	}
 	

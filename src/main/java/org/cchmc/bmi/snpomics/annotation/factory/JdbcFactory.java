@@ -48,6 +48,8 @@ public class JdbcFactory extends AnnotationFactory {
 	@Override
 	public <T extends ReferenceAnnotation> JdbcLoader<T> getLoader(
 			Class<T> cls, String version) throws AnnotationNotFoundException {
+		
+		verifyGenomeIsSet();
 		JdbcLoader<?> loader = null;
 		@SuppressWarnings("rawtypes")
 		ReferenceMetadata<?> rmd = new ReferenceMetadata(cls, genome, version);
@@ -67,6 +69,7 @@ public class JdbcFactory extends AnnotationFactory {
 	@SuppressWarnings("unchecked")
 	@Override
 	protected <T extends ReferenceAnnotation> JdbcImporter<T> getImporter(ReferenceMetadata<T> ref) {
+		verifyGenomeIsSet();
 		JdbcImporter<T> importer = null;
 		if (ref.getAnnotationClass() == TranscriptAnnotation.class)
 			importer = (JdbcImporter<T>) new TranscriptImporter();
@@ -211,6 +214,7 @@ public class JdbcFactory extends AnnotationFactory {
 	
 	@Override
 	public Genome getGenome() {
+		verifyGenomeIsSet();
 		PreparedStatement stat = null;
 		ResultSet rs = null;
 		if (curGenome == null) {
@@ -263,6 +267,7 @@ public class JdbcFactory extends AnnotationFactory {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends ReferenceAnnotation> List<ReferenceMetadata<T>> getAvailableVersions(Class<T> cls) {
+		verifyGenomeIsSet();
 		//Can't just return versions.get(cls) because of type-checking - so
 		//the rest of this is blatantly unsafe, "fool the compiler" type stuff
 		List<ReferenceMetadata<T>> result = new ArrayList<ReferenceMetadata<T>>();
@@ -275,11 +280,13 @@ public class JdbcFactory extends AnnotationFactory {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends ReferenceAnnotation> ReferenceMetadata<T> getDefaultVersion(Class<T> cls) {
+		verifyGenomeIsSet();
 		return (ReferenceMetadata<T>)defaults.get(cls);
 	}
 
 	@Override
 	public void setDefaultVersion(Class<? extends ReferenceAnnotation> cls, String version) {
+		verifyGenomeIsSet();
 		for (ReferenceMetadata<?> rmd : versions.get(cls))
 			if (rmd.getVersion().equals(version))
 				defaults.put(cls, rmd);
@@ -287,6 +294,7 @@ public class JdbcFactory extends AnnotationFactory {
 
 	@Override
 	public void makeVersionPermanentDefault(Class<? extends ReferenceAnnotation> cls, String version) {
+		verifyGenomeIsSet();
 		setDefaultVersion(cls, version);
 		PreparedStatement stat = null;
 		try {
@@ -307,6 +315,7 @@ public class JdbcFactory extends AnnotationFactory {
 	
 	@Override
 	public boolean importData(Reader input, ReferenceMetadata<? extends ReferenceAnnotation> ref) {
+		verifyGenomeIsSet();
 		//Ignore the default flag!
 		ref.setDefault(false);
 		//Add ref to our cache of rmds
@@ -320,7 +329,7 @@ public class JdbcFactory extends AnnotationFactory {
 		
 		/*
 		 * Ack!  SQLite doesn't recognize SHOW TABLES!  The canonical method to get a list of
-		 * tables seems to be SELECT * FROM dbname.sqlite_master WHERE type='table';
+		 * tables seems to be "SELECT * FROM sqlite_master WHERE type='table'"
 		 * Which obviously won't work in other DBs.  So instead, I guess we'll abuse Java exceptions
 		 */
 		String tableName = "";
@@ -445,6 +454,19 @@ public class JdbcFactory extends AnnotationFactory {
 			e.printStackTrace();
 			return null;
 		} finally {}
+	}
+	
+	/**
+	 * If a current genome has not been set, looks in the Snpomics Properties
+	 * for a default.  If there's none, throws an exception
+	 */
+	private void verifyGenomeIsSet() {
+		if (genome == null || genome.isEmpty()) {
+			String defaultGenome = SnpomicsEngine.getProperty("default.genome");
+			if (defaultGenome == null)
+				throw new RuntimeException("No genome set!");
+			setGenome(defaultGenome);
+		}
 	}
 	
 	class ShutdownRunnable implements Runnable {

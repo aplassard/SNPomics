@@ -5,9 +5,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.Set;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
+import org.cchmc.bmi.snpomics.Genome;
 import org.cchmc.bmi.snpomics.SnpomicsEngine;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.annotation.factory.JdbcFactory;
@@ -65,6 +67,8 @@ public class SnpomicsMain {
 			//Now that we know it's not create, set the genome
 			if (arg.genome != null)
 				factory.setGenome(arg.genome);
+			else
+				setGenomeIfOnlyOnePossibility(factory);
 
 			if (command.equals("list")) {
 				ListCommand.run(factory, listArg);
@@ -106,5 +110,10 @@ public class SnpomicsMain {
 		}
 	}
 	
+	private static void setGenomeIfOnlyOnePossibility(AnnotationFactory factory) {
+		Set<Genome> genomes = factory.getAvailableGenomes();
+		if (genomes.size() == 1)
+			factory.setGenome(genomes.iterator().next().getName());
+	}
 	
 }
