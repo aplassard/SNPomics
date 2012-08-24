@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.cchmc.bmi.snpomics.annotation.interactive.InteractiveAnnotation;
+import org.cchmc.bmi.snpomics.exception.SnpomicsException;
 
 public class Variant {
 	/*
@@ -92,7 +93,7 @@ public class Variant {
 	}
 	public void addAnnotation(List<? extends InteractiveAnnotation> newAnnot, int altAllele) {
 		if (newAnnot.size() == 0)
-			throw new IllegalArgumentException("addAnnotation called with no explicit class and an empty list");
+			throw new SnpomicsException("addAnnotation called with no explicit class and an empty list");
 		addAnnotation(newAnnot.get(0).getClass(), newAnnot, altAllele);
 	}
 	

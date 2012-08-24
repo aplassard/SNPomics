@@ -13,6 +13,8 @@ import java.util.zip.GZIPInputStream;
 
 import org.cchmc.bmi.snpomics.GenomicSpan;
 import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
+import org.cchmc.bmi.snpomics.exception.SnpomicsException;
+import org.cchmc.bmi.snpomics.exception.UserException;
 
 public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation> 
 		implements MappedAnnotationLoader<TranscriptAnnotation> {
@@ -33,8 +35,7 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 			if (rs.next())
 				return createTranscriptFromRS(rs);
 		} catch (SQLException e) {
-			e.printStackTrace();
-			return null;
+			throw new UserException.SQLError(e);
 		} finally {
 			try {
 				if (stat != null)
@@ -56,8 +57,7 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 			while (rs.next())
 				result.add(createTranscriptFromRS(rs));
 		} catch (SQLException e) {
-			e.printStackTrace();
-			return result;
+			throw new UserException.SQLError(e);
 		} finally {
 			try {
 				if (stat != null)
@@ -89,8 +89,7 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 						cache.add(createTranscriptFromRS(rs));
 				}
 			} catch (SQLException e) {
-				e.printStackTrace();
-				return result;
+				throw new UserException.SQLError(e);
 			} finally {
 				try {
 					if (stat != null)
@@ -122,8 +121,7 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 			while (rs.next())
 				result.add(createTranscriptFromRS(rs));
 		} catch (SQLException e) {
-			e.printStackTrace();
-			return result;
+			throw new UserException.SQLError(e);
 		} finally {
 			try {
 				if (stat != null)
@@ -153,10 +151,9 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 				return true;
 			}
 		} catch (IOException e) {
-			throw new RuntimeException("Error decompressing sequence: "+e.getMessage());
+			throw new SnpomicsException("Error decompressing sequence", e);
 		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
+			throw new UserException.SQLError(e);
 		} finally {
 			try {
 				if (stat != null)
@@ -189,8 +186,7 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 			}
 			tx.setExons(exons);
 		} catch (SQLException e) {
-			e.printStackTrace();
-			return null;
+			throw new UserException.SQLError(e);
 		}
 		return tx;
 	}

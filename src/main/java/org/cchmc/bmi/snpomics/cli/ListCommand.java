@@ -16,6 +16,8 @@ import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.annotation.reference.AnnotationType;
 import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
 import org.cchmc.bmi.snpomics.cli.arguments.ListArguments;
+import org.cchmc.bmi.snpomics.exception.SnpomicsException;
+import org.cchmc.bmi.snpomics.exception.UserException;
 import org.cchmc.bmi.snpomics.reader.InputIterator;
 import org.cchmc.bmi.snpomics.util.StringUtils;
 import org.cchmc.bmi.snpomics.writer.VariantWriter;
@@ -116,7 +118,7 @@ public class ListCommand {
 		try {
 			prop.store(System.out, "Snpomics Parameters");
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new UserException.IOError(e);
 		}
 	}
 	
@@ -127,10 +129,8 @@ public class ListCommand {
 			try {
 				InputIterator it = cls.newInstance();
 				System.out.println(it.name()+"\t"+it.preferredExtension()+"\t"+it.description());
-			} catch (InstantiationException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				throw new SnpomicsException("Can't instantiate InputIterator", e);
 			}
 		}
 	}
@@ -142,10 +142,8 @@ public class ListCommand {
 			try {
 				VariantWriter it = cls.newInstance();
 				System.out.println(it.name()+"\t"+it.preferredExtension()+"\t"+it.description());
-			} catch (InstantiationException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				throw new SnpomicsException("Can't instantiate VariantWriter", e);
 			}
 		}
 	}
@@ -159,10 +157,8 @@ public class ListCommand {
 				Map<String, String> options = it.getAvailableParameters();
 				for (String opt : options.keySet())
 					System.out.println(it.name()+"\t"+opt+"\t"+options.get(opt));
-			} catch (InstantiationException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				throw new SnpomicsException("Can't instantiate InputIterator", e);
 			}
 		}
 	}
@@ -176,10 +172,8 @@ public class ListCommand {
 				Map<String, String> options = it.getAvailableParameters();
 				for (String opt : options.keySet())
 					System.out.println(it.name()+"\t"+opt+"\t"+options.get(opt));
-			} catch (InstantiationException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				throw new SnpomicsException("Can't instantiate VariantWriter", e);
 			}
 		}
 	}

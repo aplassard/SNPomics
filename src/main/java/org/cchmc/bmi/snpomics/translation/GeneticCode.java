@@ -3,6 +3,8 @@ package org.cchmc.bmi.snpomics.translation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.cchmc.bmi.snpomics.exception.UserException;
+
 
 public abstract class GeneticCode {
 
@@ -42,7 +44,6 @@ public abstract class GeneticCode {
 		case 1: return new StandardGeneticCode();
 		case 2: return new VertebrateMitoGeneticCode();
 		}
-		System.err.println("Unknown translation table "+tableID+", using Standard(1)");
-		return new StandardGeneticCode();
+		throw new UserException.UnknownTranslationTable(tableID);
 	}
 }

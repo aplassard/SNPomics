@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
+import org.cchmc.bmi.snpomics.exception.UserException;
 import org.cchmc.bmi.snpomics.util.FastaReader;
 
 public abstract class JdbcImporter<T extends ReferenceAnnotation> implements
@@ -33,8 +34,7 @@ public abstract class JdbcImporter<T extends ReferenceAnnotation> implements
 			if (!indexCreationStmt().isEmpty())
 				stat.executeUpdate(indexCreationStmt());
 		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
+			throw new UserException.SQLError(e);
 		} finally {
 			try {
 				if (stat != null)

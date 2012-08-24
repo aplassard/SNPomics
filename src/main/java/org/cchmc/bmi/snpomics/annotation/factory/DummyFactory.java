@@ -12,9 +12,7 @@ import org.cchmc.bmi.snpomics.ReferenceMetadata;
 import org.cchmc.bmi.snpomics.annotation.importer.AnnotationImporter;
 import org.cchmc.bmi.snpomics.annotation.loader.AnnotationLoader;
 import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
-import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
-import org.cchmc.bmi.snpomics.exception.GenomeNotSetException;
-import org.cchmc.bmi.snpomics.exception.UnknownGenomeException;
+import org.cchmc.bmi.snpomics.exception.UserException;
 
 public class DummyFactory extends AnnotationFactory {
 	private Map<String, Genome> validGenomes;
@@ -33,7 +31,7 @@ public class DummyFactory extends AnnotationFactory {
 	@Override
 	public void setGenome(String genome) {
 		if (!validGenomes.containsKey(genome))
-			throw new UnknownGenomeException();
+			throw new UserException.UnknownGenome(genome);
 		currentGenome = genome;
 	}
 
@@ -52,11 +50,11 @@ public class DummyFactory extends AnnotationFactory {
 
 	@Override
 	public <T extends ReferenceAnnotation> AnnotationLoader<T> getLoader(Class<T> cls,
-			String version) throws AnnotationNotFoundException {
+			String version) {
 		if (currentGenome == null)
-			throw new GenomeNotSetException();
+			throw new UserException.GenomeNotSet();
 		//No reference annotations!
-		throw new AnnotationNotFoundException();
+		throw new UserException.AnnotationNotFound("dummy");
 	}
 
 	@Override

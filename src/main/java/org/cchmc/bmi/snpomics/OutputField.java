@@ -8,13 +8,15 @@ import java.util.List;
 import org.cchmc.bmi.snpomics.annotation.interactive.InteractiveAnnotation;
 import org.cchmc.bmi.snpomics.annotation.interactive.MetaAnnotation;
 import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
+import org.cchmc.bmi.snpomics.exception.SnpomicsException;
 
 public class OutputField {
 
 	public OutputField(Method source) {
 		method = source;
 		annotation = method.getAnnotation(MetaAnnotation.class);
-		//TODO: Throw an exception if annotation is null
+		throw new SnpomicsException("Method '"+method.getClass().getCanonicalName()+"."+method.getName()+
+				"' is an OutputField with no MetaAnnotation");
 	}
 	
 	public String getName() {

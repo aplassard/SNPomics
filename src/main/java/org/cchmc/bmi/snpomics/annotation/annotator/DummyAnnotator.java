@@ -6,13 +6,12 @@ import java.util.List;
 import org.cchmc.bmi.snpomics.SimpleVariant;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.annotation.interactive.DummyAnnotation;
-import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
 
 public class DummyAnnotator implements Annotator<DummyAnnotation> {
 
 	@Override
 	public List<DummyAnnotation> annotate(SimpleVariant variant,
-			AnnotationFactory factory) throws AnnotationNotFoundException {
+			AnnotationFactory factory) {
 		List<DummyAnnotation> result = new ArrayList<DummyAnnotation>();
 		DummyAnnotation annot = new DummyAnnotation();
 		StringBuilder sb = new StringBuilder();

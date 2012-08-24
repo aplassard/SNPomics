@@ -1,7 +1,6 @@
 package org.cchmc.bmi.snpomics.writer;
 
 import java.io.PrintWriter;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,6 +13,7 @@ import org.cchmc.bmi.snpomics.Genotype;
 import org.cchmc.bmi.snpomics.OutputField;
 import org.cchmc.bmi.snpomics.Variant;
 import org.cchmc.bmi.snpomics.annotation.interactive.InteractiveAnnotation;
+import org.cchmc.bmi.snpomics.exception.SnpomicsException;
 import org.cchmc.bmi.snpomics.reader.GenotypeIterator;
 import org.cchmc.bmi.snpomics.reader.InputIterator;
 import org.cchmc.bmi.snpomics.reader.VCFReader;
@@ -46,7 +46,7 @@ public class VCFWriter implements VariantWriter {
 		@Override
 		public void setInput(InputIterator input) {
 			if (!(input instanceof VCFReader))
-				throw new IllegalArgumentException("VCFtoVCFHelper must be paired with a VCFReader");
+				throw new SnpomicsException("VCFtoVCFHelper must be paired with a VCFReader");
 			vcf = (VCFReader)input;
 		}
 		@Override
@@ -104,7 +104,7 @@ public class VCFWriter implements VariantWriter {
 		@Override
 		public void setInput(InputIterator input) {
 			if (!(input instanceof GenotypeIterator))
-				throw new IllegalArgumentException("GenoToVCFHelper must be paired with a GenotypeIterator");
+				throw new SnpomicsException("GenoToVCFHelper must be paired with a GenotypeIterator");
 			geno = (GenotypeIterator)input;
 		}
 		@Override
@@ -223,12 +223,8 @@ public class VCFWriter implements VariantWriter {
 				if (nonEmptyAnnotation.matcher(value).find())
 					info.put(field.getName(), value);
 			}
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			throw new SnpomicsException("Can't get annotation", e);
 		}
 		
 		ArrayList<String> fields = new ArrayList<String>();

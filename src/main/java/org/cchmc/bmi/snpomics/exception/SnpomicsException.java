@@ -6,7 +6,7 @@ package org.cchmc.bmi.snpomics.exception;
  *
  */
 @SuppressWarnings("serial")
-public class SnpomicsException extends Exception {
+public class SnpomicsException extends RuntimeException {
 
 	public SnpomicsException() {
 	}

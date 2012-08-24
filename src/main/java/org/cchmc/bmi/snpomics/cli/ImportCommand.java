@@ -9,6 +9,9 @@ import org.cchmc.bmi.snpomics.SnpomicsEngine;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
 import org.cchmc.bmi.snpomics.cli.arguments.ImportArguments;
+import org.cchmc.bmi.snpomics.exception.UserException;
+
+import com.beust.jcommander.ParameterException;
 
 public class ImportCommand {
 
@@ -16,7 +19,8 @@ public class ImportCommand {
 	public static void run(AnnotationFactory factory, ImportArguments args) {
 		Map<String, Class<? extends ReferenceAnnotation>> refs = SnpomicsEngine.getAnnotations();
 		Class<? extends ReferenceAnnotation> refClass = refs.get(args.type);
-		//TODO: Error if args.type isn't correct!
+		if (refClass == null)
+			throw new ParameterException("Don't recognize reference type '"+args.type+"'");
 		
 		//Eww, compiler ickiness.  I can't figure out how to make this a, for
 		//example, ReferenceMetadata<TranscriptAnnotation>.  So it's raw and gross
@@ -26,11 +30,11 @@ public class ImportCommand {
 		rmd.setUpdateDate(args.updateDate);
 		rmd.setLinkTemplate(args.templateURL);
 		try {
+			if (args.filesToImport.isEmpty())
+				throw new ParameterException("Must specify file to import");
 			factory.importData(new FileReader(args.filesToImport.get(0)), rmd);
-			//TODO: Handle filesToImport being empty
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new UserException.FileNotFound(e);
 		}
 		if (args.isDefault)
 			factory.makeVersionPermanentDefault(refClass, args.version);

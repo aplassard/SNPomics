@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
-import org.cchmc.bmi.snpomics.exception.UncheckedSnpomicsException;
+import org.cchmc.bmi.snpomics.exception.SnpomicsException;
 
 /**
  * A description of the variant relative to a gene, following HGVS nomenclature (ie c.76A>C or c.76_77insT).
@@ -102,7 +102,7 @@ public class HgvsDnaName {
 	private int getNearestCodingNt(String coord) {
 		Matcher m = coordinatePattern.matcher(coord);
 		if (!m.matches())
-			throw new UncheckedSnpomicsException("Coordinate \""+coord+"\" does not match expected pattern");
+			throw new SnpomicsException("Coordinate \""+coord+"\" does not match expected pattern");
 		String utrSpec = m.group(1);
 		//If not in a UTR, then the nearest nt is already spec'd in the coordinate
 		if (utrSpec.isEmpty())

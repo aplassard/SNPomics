@@ -11,7 +11,7 @@ import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.annotation.interactive.DummyAnnotation;
 import org.cchmc.bmi.snpomics.annotation.interactive.InteractiveAnnotation;
 import org.cchmc.bmi.snpomics.annotation.interactive.TranscriptEffectAnnotation;
-import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
+import org.cchmc.bmi.snpomics.exception.UserException;
 
 /**
  * A factory class that provides {@link Annotator}s appropriate to {@link Annotation}s
@@ -46,10 +46,10 @@ public class Annotate {
 	 * @throws AnnotationNotFoundException a required reference annotation could not be loaded
 	 */
 	public static List<? extends InteractiveAnnotation> annotate(SimpleVariant variant, Class<? extends InteractiveAnnotation> cls, 
-			AnnotationFactory factory) throws AnnotationNotFoundException {
+			AnnotationFactory factory) {
 		Annotator<? extends InteractiveAnnotation> annotator = getAnnotator(cls, factory);
 		if (annotator == null)
-			throw new AnnotationNotFoundException(cls.getCanonicalName());
+			throw new UserException.AnnotationNotFound(cls.getCanonicalName());
 		return annotator.annotate(variant, factory);
 	}
 }

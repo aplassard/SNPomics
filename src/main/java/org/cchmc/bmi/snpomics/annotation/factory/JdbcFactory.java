@@ -24,7 +24,8 @@ import org.cchmc.bmi.snpomics.annotation.loader.JdbcLoader;
 import org.cchmc.bmi.snpomics.annotation.loader.TranscriptLoader;
 import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
 import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
-import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
+import org.cchmc.bmi.snpomics.exception.SnpomicsException;
+import org.cchmc.bmi.snpomics.exception.UserException;
 import org.cchmc.bmi.snpomics.util.StringUtils;
 
 /**
@@ -47,7 +48,7 @@ public class JdbcFactory extends AnnotationFactory {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends ReferenceAnnotation> JdbcLoader<T> getLoader(
-			Class<T> cls, String version) throws AnnotationNotFoundException {
+			Class<T> cls, String version) {
 		
 		verifyGenomeIsSet();
 		JdbcLoader<?> loader = null;
@@ -57,7 +58,7 @@ public class JdbcFactory extends AnnotationFactory {
 			if (cls == TranscriptAnnotation.class)
 				loader = new TranscriptLoader();
 			if (loader == null)
-				throw new AnnotationNotFoundException(cls.getCanonicalName());
+				throw new UserException.AnnotationNotFound(cls.getCanonicalName());
 			loader.setConnection(connection);
 			loaderCache.put(cls, loader);
 		}
@@ -74,7 +75,7 @@ public class JdbcFactory extends AnnotationFactory {
 		if (ref.getAnnotationClass() == TranscriptAnnotation.class)
 			importer = (JdbcImporter<T>) new TranscriptImporter();
 		if (importer == null)
-			throw new RuntimeException("Can't get an Importer for "+ref.getClass().getCanonicalName());
+			throw new SnpomicsException("Can't get an Importer for "+ref.getClass().getCanonicalName());
 		importer.setFastaReader(getFasta());
 		return importer;
 	}
@@ -125,8 +126,7 @@ public class JdbcFactory extends AnnotationFactory {
 				c = DriverManager.getConnection(url, username, password);
 			return initialize(c);
 		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
+			throw new UserException.SQLError(e);
 		}
 	}
 	
@@ -171,8 +171,7 @@ public class JdbcFactory extends AnnotationFactory {
 					"defaultVersion smallint(1) NOT NULL, "+
 					"PRIMARY KEY(genome,javaclass,version))");
 		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
+			throw new UserException.SQLError(e);
 		} finally {
 			try {
 				if (stat != null)
@@ -194,8 +193,7 @@ public class JdbcFactory extends AnnotationFactory {
 				result.add(createGenomeFromRS(rs));
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
-			return result;
+			throw new UserException.SQLError(e);
 		} finally {
 			try {
 				if (stat != null)
@@ -207,6 +205,11 @@ public class JdbcFactory extends AnnotationFactory {
 
 	@Override
 	public void setGenome(String genome) {
+		Set<String> goodGenomes = new HashSet<String>();
+		for (Genome g : getAvailableGenomes())
+			goodGenomes.add(g.getName());
+		if (!goodGenomes.contains(genome))
+			throw new UserException.UnknownGenome(genome);
 		this.genome = genome;
 		curGenome = null;
 		loadAnnotationTables();
@@ -226,8 +229,7 @@ public class JdbcFactory extends AnnotationFactory {
 					curGenome = createGenomeFromRS(rs);
 				}
 			} catch (SQLException e) {
-				e.printStackTrace();
-				return curGenome;
+				throw new UserException.SQLError(e);
 			} finally {
 				try {
 					if (stat != null)
@@ -254,7 +256,7 @@ public class JdbcFactory extends AnnotationFactory {
 			stat.setString(7, StringUtils.join(",", newGenome.getAltTransChromosomes()));
 			stat.executeUpdate();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new UserException.SQLError(e);
 		} finally {
 			try {
 				if (stat != null)
@@ -304,7 +306,7 @@ public class JdbcFactory extends AnnotationFactory {
 			stat.setString(3, cls.getCanonicalName());
 			stat.executeUpdate();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new UserException.SQLError(e);
 		} finally {
 			try {
 				if (stat != null)
@@ -347,7 +349,7 @@ public class JdbcFactory extends AnnotationFactory {
 				}
 			} while (!isNameUnused);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new UserException.SQLError(e);
 		} finally {
 			try {
 				if (stat != null)
@@ -375,7 +377,7 @@ public class JdbcFactory extends AnnotationFactory {
 			pstat.setBoolean(8, ref.isDefault());
 			pstat.execute();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new UserException.SQLError(e);
 		} finally {
 			try {
 				if (pstat != null)
@@ -409,7 +411,7 @@ public class JdbcFactory extends AnnotationFactory {
 				tableNames.put(rmd, rs.getString("tablename"));
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new UserException.SQLError(e);
 		} finally {
 			try {
 				if (stat != null)
@@ -430,8 +432,7 @@ public class JdbcFactory extends AnnotationFactory {
 			for (String ch : rs.getString("altTranslateChroms").split(","))
 				g.addAltTransChromosome(ch);
 		} catch (SQLException e) {
-			e.printStackTrace();
-			return null;
+			throw new UserException.SQLError(e);
 		}
 		return g;
 	}
@@ -448,11 +449,9 @@ public class JdbcFactory extends AnnotationFactory {
 			rmd.setDefault(rs.getBoolean("defaultVersion"));
 			return rmd;
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			return null;
+			throw new SnpomicsException("Bad class in RMD", e);
 		} catch (SQLException e) {
-			e.printStackTrace();
-			return null;
+			throw new UserException.SQLError(e);
 		} finally {}
 	}
 	
@@ -464,7 +463,7 @@ public class JdbcFactory extends AnnotationFactory {
 		if (genome == null || genome.isEmpty()) {
 			String defaultGenome = SnpomicsEngine.getProperty("default.genome");
 			if (defaultGenome == null)
-				throw new RuntimeException("No genome set!");
+				throw new UserException.GenomeNotSet();
 			setGenome(defaultGenome);
 		}
 	}

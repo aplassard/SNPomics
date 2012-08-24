@@ -1,12 +1,11 @@
 package org.cchmc.bmi.snpomics;
 
-import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.cchmc.bmi.snpomics.exception.UncheckedSnpomicsException;
+import org.cchmc.bmi.snpomics.exception.SnpomicsException;
 
 public class Genome {
 	
@@ -17,8 +16,7 @@ public class Genome {
 		try {
 			this.source = new URI(source);
 		} catch (URISyntaxException e) {
-			e.printStackTrace();
-			this.source = null;
+			throw new SnpomicsException("Error in source URI '"+source+"'", e);
 		}
 		this.transID = 1;
 		this.altTransID = 1;
@@ -66,8 +64,7 @@ public class Genome {
 		try {
 			return taxURI.resolve(new URI(null, null, null, "id="+taxId+"&lvl=0", null));
 		} catch (URISyntaxException e) {
-			e.printStackTrace();
-			return taxURI;
+			throw new SnpomicsException("Can't construct Taxonomy link", e);
 		}
 	}
 	public URI getTransLink() {
@@ -95,18 +92,7 @@ public class Genome {
 	public String toString() {
 		return getClass().getName()+"["+name+"]";
 	}
-	
-	public static String getReferencePath() {
-		String path = SnpomicsEngine.getProperty("fastapath");
-		if (path == null)
-			throw new UncheckedSnpomicsException("fastapath not specified");
-		return path;
-	}
-	
-	public static File getReferenceDirectory() {
-		return new File(getReferencePath());
-	}
-	
+		
 	private final String name;
 	private final String organism;
 	private final int taxId;

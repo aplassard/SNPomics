@@ -1,7 +1,6 @@
 package org.cchmc.bmi.snpomics.writer;
 
 import java.io.PrintWriter;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -12,6 +11,7 @@ import java.util.Set;
 import org.cchmc.bmi.snpomics.OutputField;
 import org.cchmc.bmi.snpomics.Variant;
 import org.cchmc.bmi.snpomics.annotation.interactive.InteractiveAnnotation;
+import org.cchmc.bmi.snpomics.exception.SnpomicsException;
 import org.cchmc.bmi.snpomics.reader.InputIterator;
 import org.cchmc.bmi.snpomics.util.StringUtils;
 
@@ -75,12 +75,8 @@ public class TsvWriter implements VariantWriter {
 				}
 				columns.add(StringUtils.join(",", annot));
 			}
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			throw new SnpomicsException("Can't get annotation", e);
 		}
 
 		output.println(StringUtils.join(delim, columns));

@@ -17,7 +17,8 @@ import org.cchmc.bmi.snpomics.OutputField;
 import org.cchmc.bmi.snpomics.SnpomicsEngine;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.cli.arguments.AnnotateArguments;
-import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
+import org.cchmc.bmi.snpomics.exception.SnpomicsException;
+import org.cchmc.bmi.snpomics.exception.UserException;
 import org.cchmc.bmi.snpomics.reader.InputIterator;
 import org.cchmc.bmi.snpomics.writer.VariantWriter;
 
@@ -50,7 +51,7 @@ public class AnnotateCommand {
 			List<OutputField> desiredAnnotations = new ArrayList<OutputField>();
 			for (String field : args.fields) {
 				if (!potentialFields.containsKey(field))
-					throw new RuntimeException(field + " isn't a recognized annotation");
+					throw new SnpomicsException(field + " isn't a recognized annotation");
 				desiredAnnotations.add(potentialFields.get(field));
 			}
 			
@@ -60,14 +61,9 @@ public class AnnotateCommand {
 			System.err.printf("Runtime: %.2f s\n", (float)(end-start)/1000.0);
 
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new UserException.FileNotFound(e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (AnnotationNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new UserException.IOError(e);
 		}
 		
 	}
@@ -89,12 +85,8 @@ public class AnnotateCommand {
 			}
 			try {
 				input = readers.get(type).newInstance();
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (Exception e) {
+				throw new SnpomicsException("Can't instantiate InputIterator", e);
 			}
 		}
 		if (file.getName().equals("-"))
@@ -121,12 +113,8 @@ public class AnnotateCommand {
 			}
 			try {
 				output = writers.get(type).newInstance();
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (Exception e) {
+				throw new SnpomicsException("Can't instantiate VariantWriter", e);
 			}
 		}
 		if (file.getName().equals("-"))

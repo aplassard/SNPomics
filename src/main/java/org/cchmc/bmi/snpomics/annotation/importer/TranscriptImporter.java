@@ -15,6 +15,8 @@ import java.util.zip.GZIPOutputStream;
 
 import org.cchmc.bmi.snpomics.GenomicSpan;
 import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
+import org.cchmc.bmi.snpomics.exception.SnpomicsException;
+import org.cchmc.bmi.snpomics.exception.UserException;
 import org.cchmc.bmi.snpomics.util.BaseUtils;
 import org.cchmc.bmi.snpomics.util.StringUtils;
 
@@ -52,7 +54,7 @@ public class TranscriptImporter extends JdbcImporter<TranscriptAnnotation> {
 	@Override
 	public boolean importAnnotations(Reader input) {
 		if (fasta == null)
-			throw new RuntimeException("Ack! No FastaReader!");
+			throw new UserException.FastaNotSet();
 		createTable();
 		BufferedReader reader = new BufferedReader(input);
 		PreparedStatement stat = null;
@@ -98,11 +100,9 @@ public class TranscriptImporter extends JdbcImporter<TranscriptAnnotation> {
 				}
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
+			throw new UserException.SQLError(e);
 		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
+			throw new UserException.IOError(e);
 		} finally {
 			try {
 				if (stat != null)
@@ -119,7 +119,7 @@ public class TranscriptImporter extends JdbcImporter<TranscriptAnnotation> {
 			output.print(toCompress);
 			output.close();
 		} catch (IOException e) {
-			throw new RuntimeException("Error compressing sequence: "+e.getMessage());
+			throw new SnpomicsException("Error compressing sequence", e);
 		}
 		return bytes.toByteArray();
 

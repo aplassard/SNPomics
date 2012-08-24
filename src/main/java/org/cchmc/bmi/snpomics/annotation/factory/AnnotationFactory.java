@@ -11,7 +11,6 @@ import org.cchmc.bmi.snpomics.SnpomicsEngine;
 import org.cchmc.bmi.snpomics.annotation.importer.AnnotationImporter;
 import org.cchmc.bmi.snpomics.annotation.loader.AnnotationLoader;
 import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
-import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
 import org.cchmc.bmi.snpomics.util.FastaReader;
 
 /**
@@ -65,7 +64,7 @@ public abstract class AnnotationFactory {
 	 * @throws AnnotationNotFoundException the requested annotation is not present in this store, or no 
 	 * Loader suitable for this store exists
 	 */
-	public <T extends ReferenceAnnotation> AnnotationLoader<T> getLoader(Class<T> cls) throws AnnotationNotFoundException {
+	public <T extends ReferenceAnnotation> AnnotationLoader<T> getLoader(Class<T> cls) {
 		return getLoader(cls, getDefaultVersion(cls).getVersion());
 	}
 	/**
@@ -77,7 +76,7 @@ public abstract class AnnotationFactory {
 	 * @throws AnnotationNotFoundException the requested annotation is not present in this store, or no 
 	 * Loader suitable for this store exists
 	 */
-	public abstract <T extends ReferenceAnnotation> AnnotationLoader<T> getLoader(Class<T> cls, String version) throws AnnotationNotFoundException;
+	public abstract <T extends ReferenceAnnotation> AnnotationLoader<T> getLoader(Class<T> cls, String version);
 	
 	/**
 	 * List all of the sources of this annotation in the current genome (ie, refseq vs ensembl

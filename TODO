@@ -1,6 +1,5 @@
 Flag transcripts with invalid CDS
 Add options to change reference (use version, set default version)
-Standardize Exception hierarchy/handling
 Fix Maven naming (SNPomics-1.0-SNAPSHOT-jar-with-dependencies.jar?)
 Add annotation Group support
 Expand CLI properties support (delete properties?)
@@ -10,6 +9,7 @@ Rollback database writes on failure
 Add robust help system ('SNPomics help', 'SNPomics help list', etc)
 Properly format the output of the various 'list' commands
 Might not want to call close on System.out
+Expand TsvWriter to include genotypes and other data of interest
 
 Bugs:
 Protein names when variant spans exon/intron junction (how to annotate?)

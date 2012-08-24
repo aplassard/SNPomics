@@ -10,7 +10,6 @@ import org.cchmc.bmi.snpomics.annotation.interactive.HgvsDnaName;
 import org.cchmc.bmi.snpomics.annotation.interactive.TranscriptEffectAnnotation;
 import org.cchmc.bmi.snpomics.annotation.loader.TranscriptLoader;
 import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
-import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
 import org.cchmc.bmi.snpomics.translation.AminoAcid;
 import org.cchmc.bmi.snpomics.translation.GeneticCode;
 import org.cchmc.bmi.snpomics.util.BaseUtils;
@@ -19,7 +18,7 @@ public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnno
 
 	@Override
 	public List<TranscriptEffectAnnotation> annotate(SimpleVariant variant,
-			AnnotationFactory factory) throws AnnotationNotFoundException {
+			AnnotationFactory factory) {
 		TranscriptLoader loader = (TranscriptLoader) factory.getLoader(TranscriptAnnotation.class);
 		GeneticCode code = GeneticCode.getTable(factory.getGenome().getTransTableId(variant.getPosition().getChromosome()));
 		List<TranscriptEffectAnnotation> result = new ArrayList<TranscriptEffectAnnotation>();

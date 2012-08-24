@@ -16,14 +16,14 @@ import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.annotation.interactive.InteractiveAnnotation;
 import org.cchmc.bmi.snpomics.annotation.reference.AnnotationType;
 import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
-import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
+import org.cchmc.bmi.snpomics.exception.SnpomicsException;
 import org.cchmc.bmi.snpomics.reader.InputIterator;
 import org.cchmc.bmi.snpomics.writer.VariantWriter;
 import org.reflections.Reflections;
 
 public class SnpomicsEngine {
 	public static void run(InputIterator input, VariantWriter output, AnnotationFactory factory, 
-			List<OutputField> fields) throws AnnotationNotFoundException {
+			List<OutputField> fields)  {
 		
 		//Initialize the output
 		output.pairWithInput(input);
@@ -69,7 +69,7 @@ public class SnpomicsEngine {
 				if (OutputField.isOutputField(meth)) {
 					OutputField field = new OutputField(meth);
 					if (result.containsKey(field.getName())) {
-						throw new RuntimeException("Duplicate Names: "+meth.getName()+" and "+
+						throw new SnpomicsException("Duplicate OutputField Names: "+meth.getName()+" and "+
 								result.get(field.getName()).getInternalName());
 					}
 					result.put(field.getName(), field);
@@ -86,7 +86,7 @@ public class SnpomicsEngine {
 			AnnotationType name = cls.getAnnotation(AnnotationType.class);
 			if (name != null) {
 				if (result.containsKey(name.value())) {
-					throw new RuntimeException("Duplicate AnnotationTypes: "+cls.getCanonicalName()+
+					throw new SnpomicsException("Duplicate AnnotationTypes: "+cls.getCanonicalName()+
 							" and "+result.get(name.value()).getCanonicalName());
 				}
 				result.put(name.value(), cls);
@@ -104,12 +104,10 @@ public class SnpomicsEngine {
 					String name = cls.newInstance().name();
 					Class<?> oldVal = result.put(name, cls);
 					if (oldVal != null)
-						throw new RuntimeException("Duplicate InputIterator names: "+oldVal.getCanonicalName()+
+						throw new SnpomicsException("Duplicate InputIterator names: "+oldVal.getCanonicalName()+
 								" and "+cls.getCanonicalName());
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
+				} catch (Exception e) {
+					throw new SnpomicsException("Can't instantiate InputIterator", e);
 				}
 			}
 		}
@@ -150,10 +148,8 @@ public class SnpomicsEngine {
 						else
 							multipleSecondaries = true;
 					}
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
+				} catch (Exception e) {
+					throw new SnpomicsException("Can't instantiate InputIterator", e);
 				}
 			}
 		}
@@ -174,10 +170,8 @@ public class SnpomicsEngine {
 					if (oldVal != null)
 						throw new RuntimeException("Duplicate VariantWriter names: "+oldVal.getCanonicalName()+
 								" and "+cls.getCanonicalName());
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
+				} catch (Exception e) {
+					throw new SnpomicsException("Can't instantiate VariantWriter", e);
 				}
 			}
 		}
@@ -218,10 +212,8 @@ public class SnpomicsEngine {
 						else
 							multipleSecondaries = true;
 					}
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
+				} catch (Exception e) {
+					throw new SnpomicsException("Can't instantiate VariantWriter", e);
 				}
 			}
 		}

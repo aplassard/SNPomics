@@ -5,7 +5,6 @@ import java.util.List;
 import org.cchmc.bmi.snpomics.SimpleVariant;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.annotation.interactive.InteractiveAnnotation;
-import org.cchmc.bmi.snpomics.exception.AnnotationNotFoundException;
 
 /**
  * An object which knows how to annotate variants with a specific Annotation
@@ -20,7 +19,7 @@ public interface Annotator<T extends InteractiveAnnotation> {
 	 * @return the list of annotations
 	 * @throws AnnotationNotFoundException a required reference annotation could not be loaded
 	 */
-	List<T> annotate(SimpleVariant variant, AnnotationFactory factory) throws AnnotationNotFoundException;
+	List<T> annotate(SimpleVariant variant, AnnotationFactory factory);
 	
 	/**
 	 * Exposes the class of the Annotations we create

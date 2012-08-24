@@ -13,6 +13,7 @@ import java.util.Set;
 import org.cchmc.bmi.snpomics.AnnotatedGenotype;
 import org.cchmc.bmi.snpomics.GenomicSpan;
 import org.cchmc.bmi.snpomics.Variant;
+import org.cchmc.bmi.snpomics.exception.UserException;
 import org.cchmc.bmi.snpomics.util.StringUtils;
 
 public class VCFReader implements GenotypeIterator {
@@ -53,7 +54,7 @@ public class VCFReader implements GenotypeIterator {
 				}
 			}
 		} catch (IOException e) {
-			System.err.println(e.getMessage());
+			throw new UserException.IOError(e);
 		}
 
 	}
@@ -80,8 +81,7 @@ public class VCFReader implements GenotypeIterator {
 				fields = line.trim().split("\t");
 			} while (skipFiltered && !getFilter().equals(VCF_PASS));
 		} catch (IOException e) {
-			fields = null;
-			return false;
+			throw new UserException.IOError(e);
 		}
 		return true;
 	}

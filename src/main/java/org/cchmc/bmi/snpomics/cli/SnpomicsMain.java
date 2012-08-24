@@ -19,6 +19,8 @@ import org.cchmc.bmi.snpomics.cli.arguments.CreateArguments;
 import org.cchmc.bmi.snpomics.cli.arguments.ImportArguments;
 import org.cchmc.bmi.snpomics.cli.arguments.ListArguments;
 import org.cchmc.bmi.snpomics.cli.arguments.MainArguments;
+import org.cchmc.bmi.snpomics.exception.SnpomicsException;
+import org.cchmc.bmi.snpomics.exception.UserException;
 import org.cchmc.bmi.snpomics.util.FastaReader;
 
 import com.beust.jcommander.JCommander;
@@ -42,43 +44,51 @@ public class SnpomicsMain {
 
 		try {
 			parser.parse(args);
-		} catch (ParameterException e) {
-			System.err.println(e.getMessage());
-			System.exit(1);
-		}
 
-		if (arg.configFile != null)
-			loadConfigFile(arg.configFile);
-		populateSnpomicsProperties();
+			if (arg.configFile != null)
+				loadConfigFile(arg.configFile);
+			populateSnpomicsProperties();
+		
+			AnnotationFactory factory = new JdbcFactory();
+			if (arg.initializeBackend)
+				factory.initializeEmptyBackend();
+			if (arg.fasta != null)
+				factory.setFasta(new FastaReader(arg.fasta));
+			//Don't set the genome here - if the command is "create" it won't
+			//exist yet
+			
+			String command = parser.getParsedCommand();
+			if (command == null)
+				throw new ParameterException("Must specify a command (annot, list, create, import)");
+			if (command.equals("create")) {
+				createArg.name = arg.genome;
+				CreateCommand.run(factory, createArg);
+			} else {
+				//Now that we know it's not create, set the genome
+				if (arg.genome != null)
+					factory.setGenome(arg.genome);
+				else
+					setGenomeIfOnlyOnePossibility(factory);
 	
-		AnnotationFactory factory = new JdbcFactory();
-		if (arg.initializeBackend)
-			factory.initializeEmptyBackend();
-		if (arg.fasta != null)
-			factory.setFasta(new FastaReader(arg.fasta));
-		//Don't set the genome here - if the command is "create" it won't
-		//exist yet
-		
-		String command = parser.getParsedCommand();
-		if (command.equals("create")) {
-			createArg.name = arg.genome;
-			CreateCommand.run(factory, createArg);
-		} else {
-			//Now that we know it's not create, set the genome
-			if (arg.genome != null)
-				factory.setGenome(arg.genome);
-			else
-				setGenomeIfOnlyOnePossibility(factory);
-
-			if (command.equals("list")) {
-				ListCommand.run(factory, listArg);
-			} else if (command.equals("annot")) {
-				AnnotateCommand.run(factory, annotArg);
-			} else if (command.equals("import")) {
-				ImportCommand.run(factory, importArg);
+				if (command.equals("list")) {
+					ListCommand.run(factory, listArg);
+				} else if (command.equals("annot")) {
+					AnnotateCommand.run(factory, annotArg);
+				} else if (command.equals("import")) {
+					ImportCommand.run(factory, importArg);
+				}
 			}
+		} catch (OutOfMemoryError e) {
+			exitWithUserException(new UserException.OutOfMemory());
+		} catch (ParameterException e) {
+			exitWithBadParameters(e);
+		} catch (UserException e) {
+			exitWithUserException(e);
+		} catch (SnpomicsException e) {
+			exitWithException(e);
+		} catch (Exception e) {
+			exitWithException(new SnpomicsException(e));
 		}
-		
 	}
 	
 	private static void loadConfigFile(File config) {
@@ -91,7 +101,7 @@ public class SnpomicsMain {
 				input = new FileInputStream(config);
 			prop.load(input);
 		} catch (IOException e) {
-			System.err.println("Can't read config file: "+e.getMessage());
+			throw new UserException.IOError(e);
 		}
 		
 		Preferences node = Preferences.userNodeForPackage(SnpomicsEngine.class);
@@ -106,7 +116,7 @@ public class SnpomicsMain {
 			for (String key : node.keys())
 				SnpomicsEngine.setProperty(key, node.get(key, ""));
 		} catch (BackingStoreException e) {
-			e.printStackTrace();
+			throw new SnpomicsException("Error storing Preferences", e);
 		}
 	}
 	
@@ -114,6 +124,32 @@ public class SnpomicsMain {
 		Set<Genome> genomes = factory.getAvailableGenomes();
 		if (genomes.size() == 1)
 			factory.setGenome(genomes.iterator().next().getName());
+	}
+	
+	private static void exitWithBadParameters(ParameterException e) {
+		System.err.println(e.getMessage());
+		System.exit(1);
+	}
+	
+	private static void exitWithUserException(UserException e) {
+		System.err.println("You goofed: "+e.getMessage());
+		if (e.getCause() != null)
+			System.err.println("Underlying exception: "+e.getCause().getMessage());
+		System.exit(1);
+	}
+	
+	private static void exitWithException(SnpomicsException e) {
+		e.printStackTrace();
+		System.err.println();
+		StringBuilder sb = new StringBuilder();
+		sb.append("I goofed: ");
+		sb.append(e.getMessage());
+		if (e.getCause() != null) {
+			sb.append(" - caused by: ");
+			sb.append(e.getCause().getMessage());
+		}
+		System.err.println(sb.toString());
+		System.exit(1);
 	}
 	
 }

@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.cchmc.bmi.snpomics.GenomicSpan;
-import org.cchmc.bmi.snpomics.exception.UncheckedSnpomicsException;
+import org.cchmc.bmi.snpomics.exception.UserException;
 
 /**
  * Extracts genomic sequence from a specified fasta file.  An index (fai) must exist!
@@ -49,9 +49,9 @@ public class FastaReader {
 			}
 			faiReader.close();
 		} catch (FileNotFoundException e) {
-			throw new UncheckedSnpomicsException("Can't find fasta or index", e);
+			throw new UserException.FileNotFound(e);
 		} catch (IOException e) {
-			throw new UncheckedSnpomicsException("IO error in fasta index", e);
+			throw new UserException.IOError(e);
 		}
 
 	}
@@ -65,9 +65,9 @@ public class FastaReader {
 				StringBuilder sb = new StringBuilder();
 				FaiEntry fai = index.get(position.getChromosome());
 				if (fai == null)
-					throw new UncheckedSnpomicsException("Chromosome "+position.getChromosome()+" is not in the fasta file");
+					throw new UserException("Chromosome "+position.getChromosome()+" is not in the fasta file");
 				if (position.getStart() < 1 || position.getEnd() > fai.size)
-					throw new UncheckedSnpomicsException(position.toString()+" is not contained in the fasta file (1-"+fai.size+")");
+					throw new UserException(position.toString()+" is not contained in the fasta file (1-"+fai.size+")");
 				long start = position.getStart() - 1;
 				long linesToSkip = start / fai.basePerLine;
 				long bytesToSkip = start % fai.basePerLine;
@@ -76,7 +76,7 @@ public class FastaReader {
 					sb.append(reader.readLine());
 				result = sb.substring(0, (int) position.length());
 			} catch (IOException e) {
-				throw new UncheckedSnpomicsException("Error reading fasta", e);
+				throw new UserException.IOError(e);
 			}
 			if (result != null)
 				cache.put(position, result);

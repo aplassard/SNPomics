@@ -9,6 +9,7 @@ import java.sql.SQLException;
 
 import org.cchmc.bmi.snpomics.GenomicSpan;
 import org.cchmc.bmi.snpomics.annotation.reference.TranscriptAnnotation;
+import org.cchmc.bmi.snpomics.exception.UserException;
 
 
 public class TFBSImporter extends JdbcImporter<TranscriptAnnotation>  {
@@ -40,11 +41,9 @@ public class TFBSImporter extends JdbcImporter<TranscriptAnnotation>  {
 					stat.execute();
 				}
 			} catch (SQLException e) {
-				e.printStackTrace();
-				return false;
+				throw new UserException.SQLError(e);
 			} catch (IOException e) {
-				e.printStackTrace();
-				return false;
+				throw new UserException.IOError(e);
 			} finally {
 				try {
 					if (stat != null)
