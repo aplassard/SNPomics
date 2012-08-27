@@ -15,8 +15,9 @@ public class OutputField {
 	public OutputField(Method source) {
 		method = source;
 		annotation = method.getAnnotation(MetaAnnotation.class);
-		throw new SnpomicsException("Method '"+method.getClass().getCanonicalName()+"."+method.getName()+
-				"' is an OutputField with no MetaAnnotation");
+		if (annotation == null)
+			throw new SnpomicsException("Method '"+method.getDeclaringClass().getCanonicalName()+"."+method.getName()+
+							"' is an OutputField with no MetaAnnotation");
 	}
 	
 	public String getName() {
