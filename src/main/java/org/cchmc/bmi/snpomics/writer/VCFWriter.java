@@ -213,7 +213,13 @@ public class VCFWriter implements VariantWriter {
 		try {
 			for (OutputField field : annotationList) {
 				List<String> annot = new ArrayList<String>();
-				for (int i=0;i<annotatedVariant.getAlt().size(); i++) {
+				if (annotatedVariant.isInvariant()) {
+					List<String> allele = new ArrayList<String>();
+					for (InteractiveAnnotation ann : annotatedVariant.getAnnot(field.getDeclaringClass(), 0))
+						allele.add(field.getOutput(ann));
+					annot.add(StringUtils.join("|", allele));
+		
+				} else for (int i=0;i<annotatedVariant.getAlt().size(); i++) {
 					List<String> allele = new ArrayList<String>();
 					for (InteractiveAnnotation ann : annotatedVariant.getAnnot(field.getDeclaringClass(), i))
 						allele.add(field.getOutput(ann));

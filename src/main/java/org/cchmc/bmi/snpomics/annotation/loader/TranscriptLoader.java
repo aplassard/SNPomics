@@ -22,6 +22,15 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 	public TranscriptLoader() {
 		cache = new ArrayList<TranscriptAnnotation>();
 		cacheRegion = new GenomicSpan();
+		isLookaheadEnabled = true;
+	}
+	
+	public void enableLookaheadCache() {
+		isLookaheadEnabled = true;
+	}
+	
+	public void disableLookaheadCache() {
+		isLookaheadEnabled = false;
 	}
 	
 	@Override
@@ -69,39 +78,48 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 
 	@Override
 	public List<TranscriptAnnotation> loadByOverlappingPosition(GenomicSpan position) {
-		List<TranscriptAnnotation> result = new ArrayList<TranscriptAnnotation>();
-		if (!cacheRegion.contains(position)) {
-			cacheRegion = new GenomicSpan(position.getChromosome(), position.getStart(), position.getEnd()+1000);
-			cache.clear();
-			List<Integer> bins = cacheRegion.getOverlappingBins();
-			PreparedStatement stat = null;
-			ResultSet rs = null;
-			try {
-				stat = connection.prepareStatement("SELECT "+columnsToSelect+" FROM `"+tableName+
-						"` WHERE chrom=? AND bin=? AND txEnd>=? AND txStart<=?");
-				stat.setString(1, cacheRegion.getChromosome());
-				stat.setLong(3, cacheRegion.getStart());
-				stat.setLong(4, cacheRegion.getEnd());
-				for (Integer bin : bins) {
-					stat.setInt(2, bin);
-					rs = stat.executeQuery();
-					while (rs.next())
-						cache.add(createTranscriptFromRS(rs));
-				}
-			} catch (SQLException e) {
-				throw new UserException.SQLError(e);
-			} finally {
-				try {
-					if (stat != null)
-						stat.close();
-				} catch (SQLException e) {}
+		List<TranscriptAnnotation> result;
+		if (isLookaheadEnabled) {
+			if (!cacheRegion.contains(position)) {
+				cacheRegion = new GenomicSpan(position.getChromosome(), position.getStart(), position.getEnd()+1000);
+				cache = loadRegion(cacheRegion);
 			}
-		}
-		for (TranscriptAnnotation tx : cache) {
-			if (tx.overlaps(position))
-				result.add(tx);
-		}
+			result = new ArrayList<TranscriptAnnotation>();
+			for (TranscriptAnnotation tx : cache) {
+				if (tx.overlaps(position))
+					result.add(tx);
+			}
+		} else
+			result = loadRegion(position);
 		return result;
+	}
+	
+	private List<TranscriptAnnotation> loadRegion(GenomicSpan position) {
+		List<TranscriptAnnotation> result = new ArrayList<TranscriptAnnotation>();
+		List<Integer> bins = position.getOverlappingBins();
+		PreparedStatement stat = null;
+		ResultSet rs = null;
+		try {
+			stat = connection.prepareStatement("SELECT "+columnsToSelect+" FROM `"+tableName+
+					"` WHERE chrom=? AND bin=? AND txEnd>=? AND txStart<=?");
+			stat.setString(1, position.getChromosome());
+			stat.setLong(3, position.getStart());
+			stat.setLong(4, position.getEnd());
+			for (Integer bin : bins) {
+				stat.setInt(2, bin);
+				rs = stat.executeQuery();
+				while (rs.next())
+					result.add(createTranscriptFromRS(rs));
+			}
+		} catch (SQLException e) {
+			throw new UserException.SQLError(e);
+		} finally {
+			try {
+				if (stat != null)
+					stat.close();
+			} catch (SQLException e) {}
+		}
+		return result;	
 	}
 
 	@Override
@@ -193,6 +211,7 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 
 	private GenomicSpan cacheRegion;
 	private List<TranscriptAnnotation> cache;
+	private boolean isLookaheadEnabled;
 	private String columnsToSelect = 
 		"id, gene, protein, chrom, strand, txStart, txEnd, cdsStart, cdsEnd, exonStarts, exonEnds";
 }

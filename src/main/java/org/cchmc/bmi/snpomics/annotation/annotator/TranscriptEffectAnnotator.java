@@ -20,74 +20,80 @@ public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnno
 	public List<TranscriptEffectAnnotation> annotate(SimpleVariant variant,
 			AnnotationFactory factory) {
 		TranscriptLoader loader = (TranscriptLoader) factory.getLoader(TranscriptAnnotation.class);
+		loader.enableLookaheadCache();
 		GeneticCode code = GeneticCode.getTable(factory.getGenome().getTransTableId(variant.getPosition().getChromosome()));
 		List<TranscriptEffectAnnotation> result = new ArrayList<TranscriptEffectAnnotation>();
 		for (TranscriptAnnotation tx : loader.loadByOverlappingPosition(variant.getPosition())) {
 			TranscriptEffectAnnotation effect = new TranscriptEffectAnnotation(tx);
 			long startCoord = variant.getPosition().getStart();
 			long endCoord = variant.getPosition().getEnd();
-			String ref = variant.getRef();
-			String alt = variant.getAlt();
-			//Normalize alleles to remove common parts
-			while (ref.length() > 0 && alt.length() > 0 && ref.charAt(0) == alt.charAt(0)) {
-				ref = ref.substring(1);
-				alt = alt.substring(1);
-				startCoord += 1;
-			}
-			//Switch strands if appropriate
-			int dir = 1;
-			if (!tx.isOnForwardStrand()) {
-				ref = BaseUtils.reverseComplement(ref);
-				alt = BaseUtils.reverseComplement(alt);
-				long temp = startCoord;
-				startCoord = endCoord;
-				endCoord = temp;
-				dir = -1;
-			}
-			effect.setCdnaRefAllele(ref);
-			effect.setCdnaAltAllele(alt);
-			//Insertions are given the flanking coordinates
-			if (ref.isEmpty()) {
-				effect.setCdnaStartCoord(getHgvsCoord(tx, startCoord-dir));
-				effect.setCdnaEndCoord(getHgvsCoord(tx, endCoord+dir));
-			} else {
+			if (variant.isInvariant()) {
 				effect.setCdnaStartCoord(getHgvsCoord(tx, startCoord));
 				if (endCoord != startCoord)
 					effect.setCdnaEndCoord(getHgvsCoord(tx, endCoord));
-			}
-			HgvsDnaName dna = effect.getHgvsCdnaObject();
-			if (dna.isCoding() && (tx.getCdsLength() % 3 == 0)) {
-				loader.loadSequence(tx);
-				int cdnaStart = dna.getNearestCodingNtToStart();
-				int cdnaEnd = dna.getNearestCodingNtToEnd();
-				//Revert the insertion coordinates
-				//BUG: What about cases like c.132-1_132insG?  This code will improperly
-				//change cdnaStart/End to 133/131
+			} else {
+				String ref = variant.getRef();
+				String alt = variant.getAlt();
+				//Normalize alleles to remove common parts
+				while (ref.length() > 0 && alt.length() > 0 && ref.charAt(0) == alt.charAt(0)) {
+					ref = ref.substring(1);
+					alt = alt.substring(1);
+					startCoord += 1;
+				}
+				//Switch strands if appropriate
+				int dir = 1;
+				if (!tx.isOnForwardStrand()) {
+					ref = BaseUtils.reverseComplement(ref);
+					alt = BaseUtils.reverseComplement(alt);
+					long temp = startCoord;
+					startCoord = endCoord;
+					endCoord = temp;
+					dir = -1;
+				}
+				effect.setCdnaRefAllele(ref);
+				effect.setCdnaAltAllele(alt);
+				//Insertions are given the flanking coordinates
 				if (ref.isEmpty()) {
-					cdnaStart++;
-					cdnaEnd--;
+					effect.setCdnaStartCoord(getHgvsCoord(tx, startCoord-dir));
+					effect.setCdnaEndCoord(getHgvsCoord(tx, endCoord+dir));
+				} else {
+					effect.setCdnaStartCoord(getHgvsCoord(tx, startCoord));
+					if (endCoord != startCoord)
+						effect.setCdnaEndCoord(getHgvsCoord(tx, endCoord));
 				}
-				String cdsSeq = tx.getCodingSequence();
-				int codonStart = (cdnaStart-1) / 3 + 1;
-				int codonEnd = (cdnaEnd-1) / 3 + 1;
-				if (codonStart > 1) codonStart--;
-				if ((codonEnd+1)*3 < cdsSeq.length()) codonEnd++;
-				effect.setProtStartPos(codonStart);
-				String refDNA = cdsSeq.substring((codonStart-1)*3, codonEnd*3);
-				String altDNA = refDNA.substring(0, cdnaStart-(codonStart-1)*3-1) +
-								alt +
-								refDNA.substring(cdnaEnd-(codonStart-1)*3);
-				List<AminoAcid> refAA = code.translate(refDNA);
-				effect.setProtRefAllele(refAA);
-				if (Math.abs(alt.length()-ref.length()) % 3 != 0) {
-					effect.setProtFrameshift(true);
-					altDNA += cdsSeq.substring(codonEnd*3);
+				HgvsDnaName dna = effect.getHgvsCdnaObject();
+				if (dna.isCoding() && (tx.getCdsLength() % 3 == 0)) {
+					loader.loadSequence(tx);
+					int cdnaStart = dna.getNearestCodingNtToStart();
+					int cdnaEnd = dna.getNearestCodingNtToEnd();
+					//Revert the insertion coordinates
+					//BUG: What about cases like c.132-1_132insG?  This code will improperly
+					//change cdnaStart/End to 133/131
+					if (ref.isEmpty()) {
+						cdnaStart++;
+						cdnaEnd--;
+					}
+					String cdsSeq = tx.getCodingSequence();
+					int codonStart = (cdnaStart-1) / 3 + 1;
+					int codonEnd = (cdnaEnd-1) / 3 + 1;
+					if (codonStart > 1) codonStart--;
+					if ((codonEnd+1)*3 < cdsSeq.length()) codonEnd++;
+					effect.setProtStartPos(codonStart);
+					String refDNA = cdsSeq.substring((codonStart-1)*3, codonEnd*3);
+					String altDNA = refDNA.substring(0, cdnaStart-(codonStart-1)*3-1) +
+									alt +
+									refDNA.substring(cdnaEnd-(codonStart-1)*3);
+					List<AminoAcid> refAA = code.translate(refDNA);
+					effect.setProtRefAllele(refAA);
+					if (Math.abs(alt.length()-ref.length()) % 3 != 0) {
+						effect.setProtFrameshift(true);
+						altDNA += cdsSeq.substring(codonEnd*3);
+					}
+					effect.setProtExtension(code.translate(cdsSeq.substring(codonEnd*3)+
+							tx.getTranscribedSequence().substring(tx.get5UtrLength()+tx.getCdsLength())));
+					effect.setProtAltAllele(code.translate(altDNA));
 				}
-				effect.setProtExtension(code.translate(cdsSeq.substring(codonEnd*3)+
-						tx.getTranscribedSequence().substring(tx.get5UtrLength()+tx.getCdsLength())));
-				effect.setProtAltAllele(code.translate(altDNA));
 			}
-			
 			result.add(effect);
 		}
 		return result;

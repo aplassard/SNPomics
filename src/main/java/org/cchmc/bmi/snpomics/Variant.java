@@ -80,6 +80,14 @@ public class Variant {
 	public void setAlt(List<String> alt) {
 		this.alt = alt;
 	}
+	/**
+	 * If ref/alt bases aren't set, this is an "invariant" variant - we're only interested in
+	 * annotating this position in the genome
+	 * @return
+	 */
+	public boolean isInvariant() {
+		return alt == null;
+	}
 	public List<? extends InteractiveAnnotation> getAnnot(Class<? extends InteractiveAnnotation> cls, int altAllele) {
 		if (!annot.containsKey(cls))
 			return Collections.emptyList();
@@ -98,6 +106,8 @@ public class Variant {
 	}
 	
 	public SimpleVariant getSimpleVariant(int altAllele) {
+		if (isInvariant())
+			return new SimpleVariant(getPosition());
 		return new SimpleVariant(getPosition(), getRef(), getAlt().get(altAllele));
 	}
 }

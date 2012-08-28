@@ -45,7 +45,10 @@ public class SnpomicsEngine {
 			Variant annotated = input.getVariant();
 			//For each variant, annotate each allele with each annotation
 			for (Annotator<? extends InteractiveAnnotation> ann : annotators) {
-				for (int i=0; i<annotated.getAlt().size(); i++) {
+				if (annotated.isInvariant()) {
+					SimpleVariant sv = annotated.getSimpleVariant(0);
+					annotated.addAnnotation(ann.getAnnotationClass(), ann.annotate(sv, factory), 0);
+				} else for (int i=0; i<annotated.getAlt().size(); i++) {
 					SimpleVariant sv = annotated.getSimpleVariant(i);
 					annotated.addAnnotation(ann.getAnnotationClass(), ann.annotate(sv, factory), i);
 				}

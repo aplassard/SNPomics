@@ -30,6 +30,33 @@ public final class GenomicSpan implements Comparable<GenomicSpan>, Cloneable {
 	public GenomicSpan(String chrom, long pos) {
 		this(chrom, pos, pos);
 	}
+	
+	public static GenomicSpan fromBin(String chromosome, int bin) {
+		long start, end;
+		//Don't allow it to run off the end forever
+		if (bin > 65266)
+			bin = 0;
+		if (bin >= 4681) {
+			start = (bin-4681) << 14;
+			end = start + (1 << 14) - 1;
+		} else if (bin >= 585) {
+			start = (bin-585) << 17;
+			end = start + (1 << 17) - 1;
+		} else if (bin >= 73) {
+			start = (bin-73) << 20;
+			end = start + (1 << 20) - 1;
+		} else if (bin >= 9) {
+			start = (bin-9) << 23;
+			end = start + (1 << 23) - 1;
+		} else if (bin >= 1) {
+			start = (bin-1) << 26;
+			end = start + (1 << 26) - 1;
+		} else {
+			start = 0;
+			end = (1 << 29) - 1;
+		}
+		return new GenomicSpan(chromosome, start+1, end+1);
+	}
 
 	public String getChromosome() {
 		return chromosome;

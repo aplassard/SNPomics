@@ -25,6 +25,14 @@ public class SimpleVariant {
 		}
 	}
 	
+	public SimpleVariant(GenomicSpan pos) {
+		position = pos.clone();
+	}
+	
+	public boolean isInvariant() {
+		return alt == null;
+	}
+	
 	private GenomicSpan position;
 	private String ref;
 	private String alt;

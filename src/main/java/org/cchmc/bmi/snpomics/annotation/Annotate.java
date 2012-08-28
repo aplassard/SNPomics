@@ -6,10 +6,12 @@ import org.cchmc.bmi.snpomics.SimpleVariant;
 import org.cchmc.bmi.snpomics.Variant;
 import org.cchmc.bmi.snpomics.annotation.annotator.Annotator;
 import org.cchmc.bmi.snpomics.annotation.annotator.DummyAnnotator;
+import org.cchmc.bmi.snpomics.annotation.annotator.NearestTranscriptAnnotator;
 import org.cchmc.bmi.snpomics.annotation.annotator.TranscriptEffectAnnotator;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
 import org.cchmc.bmi.snpomics.annotation.interactive.DummyAnnotation;
 import org.cchmc.bmi.snpomics.annotation.interactive.InteractiveAnnotation;
+import org.cchmc.bmi.snpomics.annotation.interactive.NearestTranscriptAnnotation;
 import org.cchmc.bmi.snpomics.annotation.interactive.TranscriptEffectAnnotation;
 import org.cchmc.bmi.snpomics.exception.UserException;
 
@@ -31,6 +33,8 @@ public class Annotate {
 			return new DummyAnnotator();
 		if (cls == TranscriptEffectAnnotation.class)
 			return new TranscriptEffectAnnotator();
+		else if (cls == NearestTranscriptAnnotation.class)
+			return new NearestTranscriptAnnotator();
 		return null;
 	}
 	

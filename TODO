@@ -4,7 +4,6 @@ Fix Maven naming (SNPomics-1.0-SNAPSHOT-jar-with-dependencies.jar?)
 Add annotation Group support
 Expand CLI properties support (delete properties?)
 Register requested OutputFields with InteractiveAnnotations to allow optimizations? (eg, don't calculate protein effects if not needed)
-Use correct translation table for Alt chromosomes
 Rollback database writes on failure
 Add robust help system ('SNPomics help', 'SNPomics help list', etc)
 Properly format the output of the various 'list' commands

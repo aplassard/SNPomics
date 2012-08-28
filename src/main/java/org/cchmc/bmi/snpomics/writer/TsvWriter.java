@@ -38,6 +38,7 @@ public class TsvWriter implements VariantWriter {
 	@Override
 	public void writeHeaders(List<OutputField> fields) {
 		ArrayList<String> columns = new ArrayList<String>();
+		columns.add("ID");
 		columns.add("Chromosome");
 		columns.add("Position");
 		columns.add("Reference");
@@ -53,6 +54,7 @@ public class TsvWriter implements VariantWriter {
 	@Override
 	public void writeVariant(Variant annotatedVariant) {
 		ArrayList<String> columns = new ArrayList<String>();
+		columns.add(annotatedVariant.getId());
 		columns.add(annotatedVariant.getPosition().getChromosome());
 		columns.add(Long.toString(annotatedVariant.getPosition().getStart()));
 		columns.add(annotatedVariant.getRef());
@@ -67,7 +69,12 @@ public class TsvWriter implements VariantWriter {
 		try {
 			for (OutputField field : annotationList) {
 				List<String> annot = new ArrayList<String>();
-				for (int i=0;i<annotatedVariant.getAlt().size(); i++) {
+				if (annotatedVariant.isInvariant()) {
+					List<String> allele = new ArrayList<String>();
+					for (InteractiveAnnotation ann : annotatedVariant.getAnnot(field.getDeclaringClass(), 0))
+						allele.add(field.getOutput(ann));
+					annot.add(StringUtils.join("|", allele));
+				} else for (int i=0;i<annotatedVariant.getAlt().size(); i++) {
 					List<String> allele = new ArrayList<String>();
 					for (InteractiveAnnotation ann : annotatedVariant.getAnnot(field.getDeclaringClass(), i))
 						allele.add(field.getOutput(ann));
