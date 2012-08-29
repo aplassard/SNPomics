@@ -42,6 +42,8 @@ public class NearestTranscriptAnnotator implements
 		List<Pair> leftGene = new ArrayList<Pair>();
 		int bin = variant.getPosition().getBin();
 		GenomicSpan binSpan = GenomicSpan.fromBin(variant.getPosition().getChromosome(), bin);
+		Set<String> txId = new HashSet<String>();
+		Set<String> geneID = new HashSet<String>();
 		//Look left
 		do {
 			for (TranscriptAnnotation trans : loader.loadByOverlappingPosition(binSpan)) {
@@ -51,7 +53,7 @@ public class NearestTranscriptAnnotator implements
 			}
 			
 			Collections.sort(leftTx);
-			Set<String> txId = new HashSet<String>();
+			txId.clear();
 			int i=0;
 			while (i < leftTx.size()) {
 				if (txId.contains(leftTx.get(i).tx.getID()))
@@ -65,7 +67,7 @@ public class NearestTranscriptAnnotator implements
 				leftTx.subList(NUM_HITS, leftTx.size()).clear();
 			
 			Collections.sort(leftGene);
-			Set<String> geneID = new HashSet<String>();
+			geneID.clear();
 			i=0;
 			while (i < leftGene.size()) {
 				if (geneID.contains(leftGene.get(i).tx.getName()))
@@ -93,16 +95,15 @@ public class NearestTranscriptAnnotator implements
 		//or until we're farther from the variant than the farthest gene found to the left
 		//Note that there's a short-circuit in the loop to quit when we've found NUM_HITS genes
 		while (binSpan.getStart() > variant.getPosition().getEnd() &&
-				!(leftGene.size() > 0 && 
-				  Math.abs(leftGene.get(leftGene.size()-1).dist) > binSpan.getStart() - variant.getPosition().getEnd())) {
+				binSpan.getStart() - variant.getPosition().getEnd() < 1E6) {
 			for (TranscriptAnnotation trans : loader.loadByOverlappingPosition(binSpan)) {
 				long dist = distance(variant, trans);
 				rightTx.add(new Pair(trans, dist));
 				rightGene.add(new Pair(trans, dist));
 			}
 			
-			Collections.sort(leftTx);
-			Set<String> txId = new HashSet<String>();
+			Collections.sort(rightTx);
+			txId.clear();
 			int i=0;
 			while (i < rightTx.size()) {
 				if (txId.contains(rightTx.get(i).tx.getID()))
@@ -115,8 +116,8 @@ public class NearestTranscriptAnnotator implements
 			if (rightTx.size() > NUM_HITS)
 				rightTx.subList(NUM_HITS, rightTx.size()).clear();
 			
-			Collections.sort(leftGene);
-			Set<String> geneID = new HashSet<String>();
+			Collections.sort(rightGene);
+			geneID.clear();
 			i=0;
 			while (i < rightGene.size()) {
 				if (geneID.contains(rightGene.get(i).tx.getName()))
@@ -131,6 +132,9 @@ public class NearestTranscriptAnnotator implements
 				break;
 			}
 			
+			if (leftGene.size() > 0 && Math.abs(leftGene.get(leftGene.size()-1).dist) < binSpan.getEnd() - variant.getPosition().getEnd())
+				break;
+			
 			bin++;
 			binSpan = GenomicSpan.fromBin(variant.getPosition().getChromosome(), bin);
 		}
@@ -139,7 +143,7 @@ public class NearestTranscriptAnnotator implements
 		leftTx.addAll(rightTx);
 		leftGene.addAll(rightGene);
 		Collections.sort(leftTx);
-		Set<String> txId = new HashSet<String>();
+		txId.clear();
 		int i=0;
 		while (i < leftTx.size()) {
 			if (txId.contains(leftTx.get(i).tx.getID()))
@@ -153,7 +157,7 @@ public class NearestTranscriptAnnotator implements
 			leftTx.subList(NUM_HITS, leftTx.size()).clear();
 		
 		Collections.sort(leftGene);
-		Set<String> geneID = new HashSet<String>();
+		geneID.clear();
 		i=0;
 		while (i < leftGene.size()) {
 			if (geneID.contains(leftGene.get(i).tx.getName()))
