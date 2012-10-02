@@ -12,7 +12,6 @@ Expand TsvWriter to include genotypes and other data of interest
 
 Bugs:
 Protein names when variant spans exon/intron junction (how to annotate?)
-Protein names when duplicating insertions > 1bp on reverse strand
 cDNA names - duplicating insertions
 VCF output is invalid for p.(=) - can't have = in an INFO field
 

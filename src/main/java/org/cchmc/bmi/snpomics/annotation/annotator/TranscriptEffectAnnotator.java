@@ -76,8 +76,17 @@ public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnno
 					String cdsSeq = tx.getCodingSequence();
 					int codonStart = (cdnaStart-1) / 3 + 1;
 					int codonEnd = (cdnaEnd-1) / 3 + 1;
-					if (codonStart > 1) codonStart--;
-					if ((codonEnd+1)*3 < cdsSeq.length()) codonEnd++;
+					//Determine how many codons 5' of the variation to pull
+					//This is usually 1, but we need more for insertions to determine
+					//duplications
+					int prefixCodons = 1;
+					if (alt.length() > ref.length())
+						prefixCodons = ((alt.length() - ref.length()) / 3) + 1;
+					if (codonStart > prefixCodons) 
+						codonStart -= prefixCodons;
+					else
+						codonStart = 1; //Might not be necessary, but grab as much as possible
+					if ((codonEnd+1)*3 <= cdsSeq.length()) codonEnd++;
 					effect.setProtStartPos(codonStart);
 					String refDNA = cdsSeq.substring((codonStart-1)*3, codonEnd*3);
 					String altDNA = refDNA.substring(0, cdnaStart-(codonStart-1)*3-1) +
