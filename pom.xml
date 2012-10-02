@@ -8,7 +8,40 @@
   <packaging>jar</packaging>
 
   <name>SNPomics</name>
+  <description>A general framework for annotating genomic variants</description>
   <url>http://maven.apache.org</url>
+  <inceptionYear>2012</inceptionYear>
+  <organization>
+    <name>Cincinnati Children's Hospital</name>
+    <url>http://bmi.cchmc.org</url>
+  </organization>
+  <developers>
+   <developer>
+    <id>pdexheimer</id>
+    <name>Phillip Dexheimer</name>
+    <email>phillip.dexheimer@cchmc.org</email>
+    <organization>CCHMC</organization>
+    <roles>
+     <role>architect</role>
+     <role>developer</role>
+    </roles>
+    <timezone>-5</timezone>
+   </developer>
+   <developer>
+    <id>aplassard</id>
+    <name>Andrew Plassard</name>
+    <email>andrew.plassard@cchmc.org</email>
+    <organization>CCHMC</organization>
+    <roles>
+     <role>developer</role>
+    </roles>
+    <timezone>-5</timezone>
+   </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/aplassard/SNPomics.git</connection>
+    <url>https://github.com/aplassard/SNPomics</url>
+  </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -197,7 +197,7 @@ public class NearestTranscriptAnnotator implements
 		if (tx.isOnForwardStrand())
 			return variant.getPosition().getStart() - tx.getPosition().getStart();
 		else
-			return tx.getPosition().getStart() - variant.getPosition().getEnd();
+			return tx.getPosition().getEnd() - variant.getPosition().getStart();
 	}
 
 	@Override
