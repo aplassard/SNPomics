@@ -150,7 +150,7 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 	}
 	
 	public boolean loadSequence(TranscriptAnnotation tx) {
-		if (!tx.getTranscribedSequence().isEmpty())
+		if (!tx.getSplicedSequence().isEmpty())
 			return true;
 		PreparedStatement stat = null;
 		ResultSet rs = null;
@@ -163,7 +163,7 @@ public class TranscriptLoader extends JdbcLoader<TranscriptAnnotation>
 										new InputStreamReader(
 										new GZIPInputStream(
 										new ByteArrayInputStream(rs.getBytes(1)))));
-				tx.setTranscribedSequence(reader.readLine());
+				tx.setSplicedSequence(reader.readLine());
 				reader.close();
 
 				return true;

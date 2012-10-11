@@ -66,6 +66,10 @@ public class HgvsProtName {
 		this.isFrameshift = isFrameshift;
 	}
 
+	public void setUnknown() {
+		name = "p.?";
+	}
+	
 	private void buildName() {
 		if (startCoord == 0) {
 			name = "";

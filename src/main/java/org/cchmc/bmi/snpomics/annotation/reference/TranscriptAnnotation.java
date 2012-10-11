@@ -39,11 +39,11 @@ public class TranscriptAnnotation implements MappedAnnotation {
 		this.protID = protID;
 	}
 	
-	public String getTranscribedSequence() {
+	public String getSplicedSequence() {
 		return txSequence;
 	}
 	
-	public void setTranscribedSequence(String txSequence) {
+	public void setSplicedSequence(String txSequence) {
 		this.txSequence = txSequence;
 	}
 	

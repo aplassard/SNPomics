@@ -91,6 +91,10 @@ public class TranscriptEffectAnnotation implements InteractiveAnnotation {
 	public void setProtFrameshift(boolean isFrameshift) {
 		protName.setFrameshift(isFrameshift);
 	}
+	
+	public void setProtUnknownEffect() {
+		protName.setUnknown();
+	}
 
 	private TranscriptAnnotation tx;
 	private HgvsDnaName dnaName;

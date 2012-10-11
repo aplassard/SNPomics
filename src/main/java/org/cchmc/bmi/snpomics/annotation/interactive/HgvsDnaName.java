@@ -35,6 +35,39 @@ public class HgvsDnaName {
 			(isCoordinateCoding(startCoord) || (endCoord != null && isCoordinateCoding(endCoord)));
 	}
 	
+	public boolean affectsSplicing() {
+		Matcher startM = splicingPattern.matcher(startCoord);
+		if (endCoord == null || endCoord.equals(startCoord)) {
+			//SNV - must hit one of [+-][12]
+			if (startM.matches()) {
+				int pos = Integer.valueOf(startM.group(3).replaceFirst("\\+", ""));
+				return (pos > -3 && pos < 3);
+			}
+			return false;
+		} else if (ref.length() > alt.length()) {
+			//deletion - must span the acceptor/donor sites
+			//however, it should only span one exon/intron junction.  For now,
+			//we'll pretend that deleting an entire intron (or exon) has predictable results
+			Matcher endM = splicingPattern.matcher(endCoord);
+			return startM.matches() ^ endM.matches();
+		} else {
+			//insertion - must lie between 1 and 2 (either + or -)
+			if (startM.matches()) {
+				int startPos = Integer.valueOf(startM.group(3).replaceFirst("\\+", ""));
+				if (startPos == -2 || startPos == 1) {
+					Matcher endM = splicingPattern.matcher(endCoord);
+					if (endM.matches()) {
+						int endPos = Integer.valueOf(endM.group(3).replaceFirst("\\+", ""));
+						return (endPos == startPos+1);
+						//Isn't this always true?  It's not like an insertion can be between
+						//1 and 12.  Oh well, sanity checks never hurt
+					}
+				}
+			}
+			return false;
+		}
+	}
+	
 	public int getNearestCodingNtToStart() {
 		return getNearestCodingNt(startCoord);
 	}
@@ -46,6 +79,14 @@ public class HgvsDnaName {
 			return getNearestCodingNt(endCoord);
 	}
 	
+	public String getStartCoord() {
+		return startCoord;
+	}
+
+	public String getEndCoord() {
+		return endCoord;
+	}
+
 	public void setStartCoordinate(String coord) {
 		startCoord = coord;
 	}
@@ -115,7 +156,8 @@ public class HgvsDnaName {
 	
 	static {
 		codingPattern = Pattern.compile("^[0-9]+$");
-		coordinatePattern = Pattern.compile("^([-*]?)([0-9]+)([-+][0-9]+)?$");
+		coordinatePattern = Pattern.compile("^([-*]?)([0-9]+)([-+][ud]?[0-9]+)?$");
+		splicingPattern = Pattern.compile("^([-*]?)([0-9]+)([-+][0-9]+)$");
 	}
 	
 	private TranscriptAnnotation tx;
@@ -127,4 +169,5 @@ public class HgvsDnaName {
 	private String alt;
 	private static Pattern codingPattern;
 	private static Pattern coordinatePattern;
+	private static Pattern splicingPattern;
 }
