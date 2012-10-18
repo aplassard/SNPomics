@@ -67,7 +67,14 @@ public class HgvsProtName {
 	}
 
 	public void setUnknown() {
-		name = "p.?";
+		StringBuilder sb = new StringBuilder();
+		String protein = tx.getProtID();
+		if (protein != null && !protein.isEmpty()) {
+			sb.append(protein);
+			sb.append(":");
+		}
+		sb.append("p.?");
+		name = sb.toString();
 	}
 	
 	private void buildName() {
