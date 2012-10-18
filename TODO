@@ -7,7 +7,6 @@ Rollback database writes on failure
 Add robust help system ('SNPomics help', 'SNPomics help list', etc)
 Properly format the output of the various 'list' commands
 Might not want to call close on System.out
-Expand TsvWriter to include genotypes and other data of interest
 
 Bugs:
 cDNA names - duplicating insertions

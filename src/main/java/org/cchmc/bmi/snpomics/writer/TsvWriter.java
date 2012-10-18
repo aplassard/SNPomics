@@ -8,10 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.cchmc.bmi.snpomics.AnnotatedGenotype;
+import org.cchmc.bmi.snpomics.Genotype;
 import org.cchmc.bmi.snpomics.OutputField;
 import org.cchmc.bmi.snpomics.Variant;
 import org.cchmc.bmi.snpomics.annotation.interactive.InteractiveAnnotation;
 import org.cchmc.bmi.snpomics.exception.SnpomicsException;
+import org.cchmc.bmi.snpomics.reader.GenotypeIterator;
 import org.cchmc.bmi.snpomics.reader.InputIterator;
 import org.cchmc.bmi.snpomics.util.StringUtils;
 
@@ -19,6 +22,8 @@ public class TsvWriter implements VariantWriter {
 
 	public TsvWriter() {
 		delim = "\t";
+		geno = null;
+		writeGenotypes = true;
 	}
 	
 	@Override
@@ -32,11 +37,16 @@ public class TsvWriter implements VariantWriter {
 	
 	@Override
 	public void pairWithInput(InputIterator input) {
-		//No-op - the only data we care about is (are?) in the Variant
+		if (input instanceof GenotypeIterator)
+			geno = (GenotypeIterator)input;
 	}
 
 	@Override
 	public void writeHeaders(List<OutputField> fields) {
+		//We can only write genotypes if they're in the input
+		if (writeGenotypes)
+			writeGenotypes = (geno == null) ? false : geno.hasGenotypes();
+		
 		ArrayList<String> columns = new ArrayList<String>();
 		columns.add("ID");
 		columns.add("Chromosome");
@@ -47,6 +57,18 @@ public class TsvWriter implements VariantWriter {
 		annotationList = fields;
 		for (OutputField f : fields)
 			columns.add(f.getName());
+		
+		if (writeGenotypes) {
+			List<String> depths = new ArrayList<String>();
+			List<String> quals = new ArrayList<String>();
+			for (String s : geno.getSamples()) {
+				depths.add(s+" Depth");
+				quals.add(s+" Qual");
+			}
+			columns.addAll(geno.getSamples());
+			columns.addAll(depths);
+			columns.addAll(quals);
+		}
 		
 		output.println(StringUtils.join(delim, columns));
 	}
@@ -85,6 +107,33 @@ public class TsvWriter implements VariantWriter {
 		} catch (Exception e) {
 			throw new SnpomicsException("Can't get annotation", e);
 		}
+		
+		if (writeGenotypes) {
+			List<String> gt = new ArrayList<String>();
+			List<String> dp = new ArrayList<String>();
+			List<String> gq = new ArrayList<String>();
+			for (Genotype g : geno.getGenotypes()) {
+				List<String> alleles = g.getAlleles(annotatedVariant);
+				if (alleles == null)
+					gt.add("No Call");
+				else
+					gt.add(StringUtils.join("/", alleles));
+				if (g instanceof AnnotatedGenotype) {
+					AnnotatedGenotype ag = (AnnotatedGenotype)g;
+					String depth = ag.getValue("DP");
+					dp.add(depth == null ? "-" : depth);
+					String qual = ag.getValue("GQ");
+					gq.add(qual == null ? "-" : qual);
+				} else {
+					dp.add("-");
+					gq.add("-");
+				}
+			}
+			
+			columns.addAll(gt);
+			columns.addAll(dp);
+			columns.addAll(gq);
+		}
 
 		output.println(StringUtils.join(delim, columns));
 	}
@@ -92,6 +141,8 @@ public class TsvWriter implements VariantWriter {
 	private PrintWriter output;
 	private String delim;
 	private List<OutputField> annotationList;
+	private boolean writeGenotypes;
+	private GenotypeIterator geno;
 	
 	@Override
 	public void close() {
@@ -105,7 +156,7 @@ public class TsvWriter implements VariantWriter {
 
 	@Override
 	public String description() {
-		return "Writes variants only to a tab-separated file";
+		return "Writes a tab-separated file";
 	}
 
 	@Override
