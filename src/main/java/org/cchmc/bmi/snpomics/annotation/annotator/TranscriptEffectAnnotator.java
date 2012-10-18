@@ -62,7 +62,7 @@ public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnno
 						effect.setCdnaEndCoord(getHgvsCoord(tx, endCoord));
 				}
 				HgvsDnaName dna = effect.getHgvsCdnaObject();
-				if (dna.isCoding() && dna.affectsSplicing())
+				if (tx.isProteinCoding() && dna.affectsSplicing())
 					effect.setProtUnknownEffect();
 				else if (dna.isCoding() && (tx.getCdsLength() % 3 == 0)) {
 					loader.loadSequence(tx);
