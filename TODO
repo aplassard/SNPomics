@@ -1,7 +1,6 @@
 Flag transcripts with invalid CDS
 Add options to change reference (use version, set default version)
 Fix Maven naming (SNPomics-1.0-SNAPSHOT-jar-with-dependencies.jar?)
-Add annotation Group support
 Expand CLI properties support (delete properties?)
 Register requested OutputFields with InteractiveAnnotations to allow optimizations? (eg, don't calculate protein effects if not needed)
 Rollback database writes on failure

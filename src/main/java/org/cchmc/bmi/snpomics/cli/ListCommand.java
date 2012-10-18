@@ -13,6 +13,7 @@ import org.cchmc.bmi.snpomics.OutputField;
 import org.cchmc.bmi.snpomics.ReferenceMetadata;
 import org.cchmc.bmi.snpomics.SnpomicsEngine;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
+import org.cchmc.bmi.snpomics.annotation.interactive.AnnotationGroup;
 import org.cchmc.bmi.snpomics.annotation.reference.AnnotationType;
 import org.cchmc.bmi.snpomics.annotation.reference.ReferenceAnnotation;
 import org.cchmc.bmi.snpomics.cli.arguments.ListArguments;
@@ -98,18 +99,24 @@ public class ListCommand {
 	}
 	
 	private static void listAnnotations() {
-		System.out.println("Name	Description	References	Groups");
+		System.out.println("Name	Description	References");
 		Map<String, OutputField> fields = SnpomicsEngine.getAllowedOutput();
 		for (OutputField f : fields.values()) {
 			ArrayList<String> refs = new ArrayList<String>();
 			for (Class<? extends ReferenceAnnotation> cls : f.getReferences())
 				refs.add(cls.getAnnotation(AnnotationType.class).value());
 			if (refs.isEmpty()) refs.add("<none>");
-			List<String> groups = f.getGroups();
 			System.out.println(f.getName()+"\t"+
 					f.getDescription()+"\t"+
-					StringUtils.join(",", refs)+"\t"+
-					(groups.isEmpty() ? "<none>" : StringUtils.join(",", groups)));
+					StringUtils.join(",", refs));
+		}
+		System.out.println();
+		System.out.println("Annotation Groups");
+		for (String key : AnnotationGroup.names()) {
+			List<String> annots = new ArrayList<String>();
+			for (OutputField f : AnnotationGroup.fields(key))
+				annots.add(f.getName());
+			System.out.println(key+"\t"+StringUtils.join(",", annots));
 		}
 	}
 	

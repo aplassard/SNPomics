@@ -29,11 +29,6 @@ public @interface MetaAnnotation {
 	String description();
 
 	/**
-	 * A list of annotation groups containing this annotation
-	 */
-	String[] groups() default {};
-
-	/**
 	 * The ReferenceAnnotations required to calculate this annotation
 	 */
 	Class<? extends ReferenceAnnotation>[] ref() default {};

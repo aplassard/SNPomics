@@ -9,13 +9,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.cchmc.bmi.snpomics.OutputField;
 import org.cchmc.bmi.snpomics.SnpomicsEngine;
 import org.cchmc.bmi.snpomics.annotation.factory.AnnotationFactory;
+import org.cchmc.bmi.snpomics.annotation.interactive.AnnotationGroup;
 import org.cchmc.bmi.snpomics.cli.arguments.AnnotateArguments;
 import org.cchmc.bmi.snpomics.exception.SnpomicsException;
 import org.cchmc.bmi.snpomics.exception.UserException;
@@ -48,15 +49,34 @@ public class AnnotateCommand {
 
 			Map<String, OutputField> potentialFields = SnpomicsEngine.getAllowedOutput();
 			
-			List<OutputField> desiredAnnotations = new ArrayList<OutputField>();
+			Set<OutputField> desiredAnnotations = new LinkedHashSet<OutputField>();
+			//Add default annotations
+			if (!args.skipDefault)
+				desiredAnnotations.addAll(AnnotationGroup.fields("default"));
+			//Add annotation groups
+			for (String group : args.groups) {
+				if (!AnnotationGroup.names().contains(group))
+					throw new UserException.AnnotationNotFound(group);
+				desiredAnnotations.addAll(AnnotationGroup.fields(group));
+			}
+			//Add individual annotations
 			for (String field : args.fields) {
 				if (!potentialFields.containsKey(field))
-					throw new SnpomicsException(field + " isn't a recognized annotation");
+					throw new UserException.AnnotationNotFound(field);
 				desiredAnnotations.add(potentialFields.get(field));
+			}
+			//Remove excluded annotations
+			for (String x : args.exclusions) {
+				OutputField f = null;
+				for (OutputField field : desiredAnnotations)
+					if (field.getName().equals(x))
+						f = field;
+				if (f != null)
+					desiredAnnotations.remove(f);
 			}
 			
 			long start = System.currentTimeMillis();
-			SnpomicsEngine.run(input, output, factory, desiredAnnotations);
+			SnpomicsEngine.run(input, output, factory, new ArrayList<OutputField>(desiredAnnotations));
 			long end = System.currentTimeMillis();
 			System.err.printf("Runtime: %.2f s\n", (float)(end-start)/1000.0);
 

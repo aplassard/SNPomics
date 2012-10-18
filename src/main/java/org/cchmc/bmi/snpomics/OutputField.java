@@ -28,10 +28,6 @@ public class OutputField {
 		return annotation.description();
 	}
 	
-	public List<String> getGroups() {
-		return Arrays.asList(annotation.groups());
-	}
-	
 	public List<Class<? extends ReferenceAnnotation>> getReferences() {
 		return Arrays.asList(annotation.ref());
 	}

@@ -28,6 +28,15 @@ public class AnnotateArguments {
 	@Parameter(names={"-f", "--fields"}, description="Annotation fields to include in output")
 	public List<String> fields = Collections.emptyList();
 	
+	@Parameter(names={"-noDefault", "--no-default-fields"}, description="Do not include the default annotation fields")
+	public Boolean skipDefault = false;
+	
+	@Parameter(names={"-G", "--annotation-group"}, description="Add a predefined set of annotation fields")
+	public List<String> groups = Collections.emptyList();
+	
+	@Parameter(names={"-x", "--exclude"}, description="Exclude annotations, either defaults or part of groups")
+	public List<String> exclusions = Collections.emptyList();
+	
 	@DynamicParameter(names="-I", description="Optional parameters for reader")
 	public Map<String, String> inputOptions = new HashMap<String, String>();
 
