@@ -216,13 +216,13 @@ public class VCFWriter implements VariantWriter {
 				if (annotatedVariant.isInvariant()) {
 					List<String> allele = new ArrayList<String>();
 					for (InteractiveAnnotation ann : annotatedVariant.getAnnot(field.getDeclaringClass(), 0))
-						allele.add(field.getOutput(ann));
+						allele.add(escapeString(field.getOutput(ann)));
 					annot.add(StringUtils.join("|", allele));
 		
 				} else for (int i=0;i<annotatedVariant.getAlt().size(); i++) {
 					List<String> allele = new ArrayList<String>();
 					for (InteractiveAnnotation ann : annotatedVariant.getAnnot(field.getDeclaringClass(), i))
-						allele.add(field.getOutput(ann));
+						allele.add(escapeString(field.getOutput(ann)));
 					annot.add(StringUtils.join("|", allele));
 				}
 				String value = StringUtils.join(",", annot);
@@ -296,6 +296,17 @@ public class VCFWriter implements VariantWriter {
 	@Override
 	public Map<String, String> getAvailableParameters() {
 		return recognizedOptions;
+	}
+	
+	/**
+	 * Sanitizes strings destined for the INFO fields to meet VCF spec (no whitespace, 
+	 * semicolon, equals sign, or comma).  An equals sign is replaced by the HTML
+	 * entity "&amp;eq;", all others are replaced by underscores
+	 * @param raw
+	 * @return
+	 */
+	public String escapeString(String raw) {
+		return raw.replaceAll("[ ,;]", "_").replaceAll("=", "&eq;");
 	}
 
 	private PrintWriter output;

@@ -23,7 +23,9 @@ public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnno
 		loader.enableLookaheadCache();
 		GeneticCode code = GeneticCode.getTable(factory.getGenome().getTransTableId(variant.getPosition().getChromosome()));
 		List<TranscriptEffectAnnotation> result = new ArrayList<TranscriptEffectAnnotation>();
+		boolean overlap = false;
 		for (TranscriptAnnotation tx : loader.loadByOverlappingPosition(variant.getPosition())) {
+			overlap = true;
 			TranscriptEffectAnnotation effect = new TranscriptEffectAnnotation(tx);
 			long startCoord = variant.getPosition().getStart();
 			long endCoord = variant.getPosition().getEnd();
@@ -62,8 +64,9 @@ public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnno
 						effect.setCdnaEndCoord(getHgvsCoord(tx, endCoord));
 				}
 				HgvsDnaName dna = effect.getHgvsCdnaObject();
-				if (tx.isProteinCoding() && dna.affectsSplicing())
+				if (tx.isProteinCoding() && dna.affectsSplicing()) {
 					effect.setProtUnknownEffect();
+				}
 				else if (dna.isCoding() && (tx.getCdsLength() % 3 == 0)) {
 					loader.loadSequence(tx);
 					int cdnaStart = dna.getNearestCodingNtToStart();
@@ -121,6 +124,10 @@ public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnno
 					effect.setProtAltAllele(code.translate(altDNA));
 				}
 			}
+			result.add(effect);
+		}
+		if (!overlap) {
+			TranscriptEffectAnnotation effect = new TranscriptEffectAnnotation(null);
 			result.add(effect);
 		}
 		return result;

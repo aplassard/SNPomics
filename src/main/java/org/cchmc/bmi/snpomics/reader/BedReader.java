@@ -36,7 +36,8 @@ public class BedReader implements InputIterator {
 				line = input.readLine();
 				if (line == null)
 					return false;
-			} while (line.startsWith("#"));
+			} while (line.isEmpty() || line.startsWith("#") || 
+					line.startsWith("track") || line.startsWith("browser"));
 		} catch (IOException e) {
 			throw new UserException.IOError(e);
 		}

@@ -17,7 +17,7 @@ public class HgvsDnaName {
 	public HgvsDnaName(TranscriptAnnotation tx) {
 		this.tx = tx;
 		name = null;
-		prefix = tx.isProteinCoding() ? "c" : "n";
+		prefix = (tx == null) ? "" : (tx.isProteinCoding() ? "c" : "n");
 		endCoord = null;
 		startCoord = null;
 		ref = null;
@@ -36,38 +36,72 @@ public class HgvsDnaName {
 	}
 	
 	public boolean affectsSplicing() {
+		return damagesSpliceDonor() || damagesSpliceAcceptor();
+	}
+
+	public boolean damagesSpliceDonor() {
 		Matcher startM = splicingPattern.matcher(startCoord);
 		if (endCoord == null || endCoord.equals(startCoord)) {
-			//SNV - must hit one of [+-][12]
-			if (startM.matches()) {
-				int pos = Integer.valueOf(startM.group(3).replaceFirst("\\+", ""));
-				return (pos > -3 && pos < 3);
-			}
-			return false;
+			//SNV - must hit one of +[12]
+			return startM.matches() && isDonorSite(startM.group(3));
 		} else if (ref.length() > alt.length()) {
-			//deletion - must span the acceptor/donor sites
+			//deletion - must span the donor site
 			//however, it should only span one exon/intron junction.  For now,
 			//we'll pretend that deleting an entire intron (or exon) has predictable results
+			
 			Matcher endM = splicingPattern.matcher(endCoord);
-			return startM.matches() ^ endM.matches();
+			//In order for a deletion to affect the donor site, the end must lie in an intron
+			if (endM.matches())
+				//There are now three ways to affect the donor site:
+				// 1) The deletion starts in an exon and thus spans the splice site
+				// 2) The deletion starts in the donor site
+				// 3) The deletion ends in the donor site
+				return !startM.matches() || 
+						isDonorSite(startM.group(3)) || 
+						isDonorSite(endM.group(3));
 		} else {
-			//insertion - must lie between 1 and 2 (either + or -)
-			if (startM.matches()) {
-				int startPos = Integer.valueOf(startM.group(3).replaceFirst("\\+", ""));
-				if (startPos == -2 || startPos == 1) {
-					Matcher endM = splicingPattern.matcher(endCoord);
-					if (endM.matches()) {
-						int endPos = Integer.valueOf(endM.group(3).replaceFirst("\\+", ""));
-						return (endPos == startPos+1);
-						//Isn't this always true?  It's not like an insertion can be between
-						//1 and 12.  Oh well, sanity checks never hurt
-					}
-				}
-			}
-			return false;
+			//insertion - must lie between +1 and +2
+			return startM.matches() && startM.group(3).equals("+1");
 		}
+		return false;
 	}
 	
+	public boolean damagesSpliceAcceptor() {
+		Matcher startM = splicingPattern.matcher(startCoord);
+		//In order to hit an acceptor, the start of the variation must be in an intron
+		if (startM.matches()) {
+			if (endCoord == null || endCoord.equals(startCoord)) {
+				//SNV - must hit one of -[12]
+				return isAcceptorSite(startM.group(3));
+			} else if (ref.length() > alt.length()) {
+				//deletion - must span the acceptor sites
+				//however, it should only span one exon/intron junction.  For now,
+				//we'll pretend that deleting an entire intron (or exon) has predictable results
+				
+				Matcher endM = splicingPattern.matcher(endCoord);
+				//There are three ways to affect the acceptor site:
+				// 1) The deletion ends in an exon and thus spans the splice site
+				// 2) The deletion starts in the acceptor site
+				// 3) The deletion ends in the acceptor site
+				return !endM.matches() || 
+						isAcceptorSite(startM.group(3)) || 
+						isAcceptorSite(endM.group(3));
+			} else {
+				//insertion - must lie between -2 and -1
+				return startM.group(3).equals("-2");
+			}
+		}
+		return false;
+	}
+
+	private boolean isDonorSite(String intronOffset) {
+		return intronOffset.equals("+1") || intronOffset.equals("+2");
+	}
+
+	private boolean isAcceptorSite(String intronOffset) {
+		return intronOffset.equals("-1") || intronOffset.equals("-2");
+	}
+
 	public int getNearestCodingNtToStart() {
 		return getNearestCodingNt(startCoord);
 	}
@@ -104,6 +138,10 @@ public class HgvsDnaName {
 	}
 
 	private void buildName() {
+		if (tx == null) {
+			name = "";
+			return;
+		}
 		StringBuilder sb = new StringBuilder();
 		sb.append(tx.getID()+":");
 		sb.append(prefix+".");

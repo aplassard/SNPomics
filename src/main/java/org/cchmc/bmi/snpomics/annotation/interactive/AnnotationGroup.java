@@ -22,6 +22,7 @@ public class AnnotationGroup {
 			ArrayList<OutputField> def = new ArrayList<OutputField>();
 			Class<?> cls = Class.forName("org.cchmc.bmi.snpomics.annotation.interactive.TranscriptEffectAnnotation");
 			def.add(new OutputField(cls.getDeclaredMethod("getGeneName")));
+			def.add(new OutputField(cls.getDeclaredMethod("getVariantFunctionAsString")));
 			def.add(new OutputField(cls.getDeclaredMethod("getHgvsCdnaName")));
 			def.add(new OutputField(cls.getDeclaredMethod("getHgvsProteinName")));
 			groups.put("default", Collections.unmodifiableList(def));

@@ -10,10 +10,11 @@ Might not want to call close on System.out
 
 Bugs:
 cDNA names - duplicating insertions
-VCF output is invalid for p.(=) - can't have = in an INFO field
+SQLite indices are universal - index 'bin' in TranscriptAnnotation clashes if multiple TAs
+complex indels have a function of "insertion"
 
 Annotations:
-More detail on TranscriptEffects - Impact, position in gene (exon/intron/UTR), effect (syn/nonsyn/nonsense/etc)
+More detail on TranscriptEffects - Impact, position in gene (exon/intron/UTR)
 dbSNP (how much detail?  Gets unwieldy)
 Other MAF sources (ESP)
 Andrew's TFBS stuff
