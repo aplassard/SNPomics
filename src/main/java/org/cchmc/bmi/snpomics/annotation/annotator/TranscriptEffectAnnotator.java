@@ -140,7 +140,7 @@ public class TranscriptEffectAnnotator implements Annotator<TranscriptEffectAnno
 	 * @param genomicCoord
 	 * @return
 	 */
-	private String getHgvsCoord(TranscriptAnnotation tx, long genomicCoord) {
+	public String getHgvsCoord(TranscriptAnnotation tx, long genomicCoord) {
 		GenomicSpan span = new GenomicSpan(tx.getPosition().getChromosome(), genomicCoord);
 		//There are three basic cases here:
 		// 1) The position is inside an exon (either coding or UTR)
